@@ -1,39 +1,36 @@
-// src/server/authController.js
 import axios from "axios";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
 export const login = async (req, res) => {
-  console.log(req.originalUrl, req.body);
   const { dni, password } = req.body;
+  console.log("Login request received for DNI:", dni);
 
-  console.log("DNI y Password recibidos en backend:", dni, password);
   try {
-    // Buscar usuario en la base de datos (aquí simulado con una llamada a JSON-server)
     const response = await axios.get(
       `http://localhost:3000/clientes?dni=${dni}`
     );
     const user = response.data[0];
 
-    if (!user) return res.status(400).json({ msg: "Usuario no encontrado" });
+    if (!user)
+      return res.status(401).json({ message: "Credenciales inválidas" });
 
-    //comparar la contraseña con el hash almacenado
-    // bcrypt.compare devuelve true si coinciden
-    //conpare transforma la constraseña en texto plano en hash y lo compara con el hash almacenado
-    console.log("Iniciando sesion");
     const ok = await bcrypt.compare(password, user.password);
-    if (!ok)
-      return res.status(400).json({ msg: "Usuario o Contraseña incorrecta" });
+    if (!ok) return res.status(401).json({ message: "Credenciales inválidas" });
 
     const token = jwt.sign(
-      { dni: user.dni, tipo: user.tipo || "user" },
+      {
+        dni: user.dni,
+        tipo: user.tipo || "user",
+      },
       process.env.JWT_SECRET,
       { expiresIn: "2h" }
     );
+
     res.json({ token, nombre: user.nombre, tipo: user.tipo || "user" });
   } catch (error) {
-    console.error(error, res);
-    res.status(500).json({ msg: "Error en el servidor" });
+    console.log(error);
+    res.status(500).json({ message: "Error en el servidor", dni });
   }
 };
 

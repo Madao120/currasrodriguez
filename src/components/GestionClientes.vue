@@ -309,7 +309,7 @@
     </form>
 
     <!-- Lista de Clientes     <div v-if="admin" class="table-responsive">-->
-    <div class="table-responsive">
+    <div v-if="admin" class="table-responsive">
       <h4
         class="text-center w-100 text-center my-2 bg-`primary-subtle py-1 border bg-primary bg-opacity-25 text-primary p-3 rounded"
       >

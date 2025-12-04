@@ -431,7 +431,7 @@
       "tipo_cliente": "empresa",
       "historico": false,
       "lopd": true,
-      "tipo": "user",
+      "tipo": "admin",
       "password": "$2b$10$/Xa8LFFc/MSkcBOlyh.68OHPehNKplX2FDOyMOI5d4WYv8mA0c/D6"
     },
     {

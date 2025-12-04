@@ -15,25 +15,25 @@ export const loginUsuario = async (dni, password) => {
   }
 };
 
-// Verificar si el usuario es admin con JWT
-/*
-export const esAdmin = () => {
+// Verificar si el usuario es admin usando JWT
+export const esAdmin = async () => {
   try {
-    const token = localStorage.getItem("token");
+    const token = sessionStorage.getItem("token"); // o localStorage
     if (!token) return false;
 
-    const response = axios.get("http://localhost:5000/api/auth/esAdmin", {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-    return response.data.esAdmin; // true o false
+    const response = await axios.get(
+      "http://localhost:5000/api/auth/check-admin",
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
+    return response.data.esAdmin; //es true or false
   } catch (error) {
     console.error("Error en esAdmin:", error);
     return false;
   }
 };
-*/
+
 //////////// PORQUE ESTE FICHERO Y NO LLAMAR DIRECTAMENTE A authController.js desde el frontend?
 
 /* 

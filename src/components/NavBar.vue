@@ -102,35 +102,47 @@
 
 <script setup>
 import { ref, onMounted } from "vue";
+import { esAdmin } from "../api/authApi.js"; // importamos la función que ya tenemos
 
-// Estado do login
 const isLogueado = ref(false);
 const isAdmin = ref(false);
 const isUsuario = ref(false);
 const userName = ref("");
 
-// Cando o componente se monta, le localStorage (para cando montes a autenticación)
-onMounted(() => {
-  isLogueado.value = localStorage.getItem("isLogueado") === "true";
-  isAdmin.value = localStorage.getItem("isAdmin") === "true";
-  isUsuario.value = localStorage.getItem("isUsuario") === "true";
-  userName.value = localStorage.getItem("userName") || "";
+// Se ejecuta al montar el componente
+onMounted(async () => {
+  const token = sessionStorage.getItem("token");
+  if (!token) {
+    isLogueado.value = false;
+    isAdmin.value = false;
+    isUsuario.value = false;
+    userName.value = "";
+    return;
+  }
+
+  try {
+    // Decidir si es admin usando la función del frontend
+    isAdmin.value = await esAdmin();
+    isUsuario.value = !isAdmin.value;
+    isLogueado.value = true;
+    userName.value = sessionStorage.getItem("userName") || "";
+  } catch (err) {
+    console.error("Error verificando si es admin", err);
+    sessionStorage.clear();
+    isLogueado.value = false;
+    isAdmin.value = false;
+    isUsuario.value = false;
+    userName.value = "";
+  }
 });
 
 // Logout
 function logout() {
-  // Borra datos de sesión do localStorage
-  localStorage.removeItem("isLogueado");
-  localStorage.removeItem("userName");
-  localStorage.removeItem("isAdmin");
-  localStorage.removeItem("isUsuario");
-  localStorage.removeItem("token");
-
-  // Actualiza estado
+  sessionStorage.clear();
   isLogueado.value = false;
+  isAdmin.value = false;
+  isUsuario.value = false;
   userName.value = "";
-
-  // Redirixe ao inicio recargando a páxina
   window.location.href = "/";
 }
 </script>
