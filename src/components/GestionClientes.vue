@@ -309,7 +309,7 @@
     </form>
 
     <!-- Lista de Clientes     <div v-if="admin" class="table-responsive">-->
-    <div v-if="admin" class="table-responsive">
+    <div v-if="isAdmin" class="table-responsive">
       <h4
         class="text-center w-100 text-center my-2 bg-`primary-subtle py-1 border bg-primary bg-opacity-25 text-primary p-3 rounded"
       >
@@ -442,14 +442,22 @@ const clientesPorPage = 10; // Número de clientes por página
 
 const cargando = ref(false); // Control de carga de datos
 
-const admin = localStorage.getItem("isAdmin") === "true";
-const usuario = localStorage.getItem("isUsuario") === "true";
+const admin = sessionStorage.getItem("isAdmin") === "true";
+const usuario = sessionStorage.getItem("isUsuario") === "true";
+const isLogueado = sessionStorage.getItem("isLogueado") === "true";
+
+// reactive state to track if user is admin
+const isAdmin = ref(false);
 /////////// zona CargarClientes
 
 // Zona Cargar clientes Al Montar el componente
 onMounted(async () => {
+  isAdmin.value = sessionStorage.getItem("isAdmin") === "true";
   cargarClientes();
   currentPage.value = 1; // Iniciar en la primera página
+  if (isLogueado) {
+    buscarClientePorDNI(sessionStorage.getItem("userDNI"));
+  }
 });
 
 const beforePagina = () => {

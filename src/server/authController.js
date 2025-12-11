@@ -4,7 +4,6 @@ import jwt from "jsonwebtoken";
 
 export const login = async (req, res) => {
   const { dni, password } = req.body;
-  console.log("Login request received for DNI:", dni);
 
   try {
     const response = await axios.get(

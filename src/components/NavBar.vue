@@ -34,7 +34,7 @@
             <li class="nav-item">
               <router-link to="/" class="nav-link">Inicio</router-link>
             </li>
-            <li class="nav-item">
+            <li v-if="isAdmin" class="nav-item">
               <router-link to="/clientes" class="nav-link"
                 >Clientes</router-link
               >
@@ -44,10 +44,10 @@
                 >Noticias</router-link
               >
             </li>
-            <li v-if="isLogeado" class="nav-item">
+            <li v-if="isAdmin" class="nav-item">
               <router-link to="/citas" class="nav-link">Citas</router-link>
             </li>
-            <li class="nav-item">
+            <li v-if="isAdmin" class="nav-item">
               <router-link to="/modelos" class="nav-link">Modelos</router-link>
             </li>
             <li class="nav-item">
@@ -63,9 +63,10 @@
 
         <!-- Dropdown de acceso/registro -->
         <div class="dropdown ms-auto align-items-center d-flex">
-          <span v-if="isLogueado" class="text-nowarp text-white text-end">{{
-            userName
-          }}</span>
+          <span
+            v-if="isLogueado"
+            class="text-nowarp text-white text-end"
+          ></span>
           <button
             class="btn btn-primary dropdown-toggle d-flex align-items-center"
             type="button"
@@ -105,43 +106,26 @@
 
 <script setup>
 import { ref, onMounted } from "vue";
-import { esAdmin } from "../api/authApi.js"; // importamos la función que ya tenemos
 
 const isLogueado = ref(false);
 const isAdmin = ref(false);
 const isUsuario = ref(false);
 const userName = ref("");
 
-// Se ejecuta al montar el componente
-onMounted(async () => {
-  const token = sessionStorage.getItem("token");
-  if (!token) {
-    isLogueado.value = false;
-    isAdmin.value = false;
-    isUsuario.value = false;
-    userName.value = "";
-    return;
-  }
-
-  try {
-    // Decidir si es admin usando la función del frontend
-    isAdmin.value = await esAdmin();
-    isUsuario.value = !isAdmin.value;
-    isLogueado.value = true;
-    userName.value = sessionStorage.getItem("userName") || "";
-  } catch (err) {
-    console.error("Error verificando si es admin", err);
-    sessionStorage.clear();
-    isLogueado.value = false;
-    isAdmin.value = false;
-    isUsuario.value = false;
-    userName.value = "";
-  }
+// Se ejecuta al montar el componente — usar localStorage (coherente con el resto de la app)
+onMounted(() => {
+  const log = sessionStorage.getItem("isLogueado") === "true";
+  isLogueado.value = log;
+  isAdmin.value = sessionStorage.getItem("isAdmin") === "true";
+  isUsuario.value = sessionStorage.getItem("isUsuario") === "true";
+  userName.value = sessionStorage.getItem("userName") || "";
 });
 
 // Logout
 function logout() {
+  console.log("Cerrando sesión...");
   sessionStorage.clear();
+  localStorage.clear();
   isLogueado.value = false;
   isAdmin.value = false;
   isUsuario.value = false;

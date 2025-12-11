@@ -1,4 +1,4 @@
-import { login, verificarToken, soloAdmin } from "./authController.js";
+import { login, verificarToken, soloAdmin } from "./authController.js ";
 import express from "express";
 
 const router = express.Router();

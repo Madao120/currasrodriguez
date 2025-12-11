@@ -6,7 +6,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import authRoutes from "./authRoutes.js"; // ruta al router backend de autenticación
 import articulosRoutes from "./articulosRoutes.js"; // ruta al router backend de artículos
-import contactosRoutes from "../api/contacto.js"; // ruta al router backend de contactos
+import contactoRoutes from "../api/contacto.js"; // ruta al router backend de contacto
 
 // Cargar variables de entorno
 dotenv.config();
@@ -47,7 +47,7 @@ app.listen(PORT, () => {
   console.log(`Server Express está corriendo en el puerto: ${PORT}`);
 });
 
-//Contactos
-app.use("/api/contactos", contactosRoutes);
+//Contacto
+app.use("/api/contacto", contactoRoutes);
 
 console.log("Server abierto en el puerto 5000");

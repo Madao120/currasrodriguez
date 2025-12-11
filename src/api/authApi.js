@@ -15,26 +15,30 @@ export const loginUsuario = async (dni, password) => {
   }
 };
 
-// Verificar si el usuario es admin usando JWT
 export const esAdmin = async () => {
   try {
-    const token = sessionStorage.getItem("token"); // o localStorage
+    const token = sessionStorage.getItem("token");
+    console.log("Token:", token);
     if (!token) return false;
 
     const response = await axios.get(
       "http://localhost:5000/api/auth/check-admin",
       {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       }
     );
-    return response.data.esAdmin; //es true or false
+    console.log(response.data.esAdmin);
+    return response.data.esAdmin;
+    // true o false
   } catch (error) {
     console.error("Error en esAdmin:", error);
     return false;
   }
 };
 
-//////////// PORQUE ESTE FICHERO Y NO LLAMAR DIRECTAMENTE A authController.js desde el frontend?
+//////////// POR QUÉ ESTE FICHERO Y NO LLAMAR DIRECTAMENTE A authController.js desde el frontend?
 
 /* 
 Este fichero actúa como intermediario entre el frontend (Vue) y el backend (Express).

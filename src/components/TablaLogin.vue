@@ -28,10 +28,10 @@
         </div>
 
         <div class="mb-3">
-          <label for="pass" class="form-label fw-bold">Contraseña:</label>
+          <label for="password" class="form-label fw-bold">Contraseña:</label>
           <input
             type="password"
-            id="pass"
+            id="password"
             autocomplete="new-password"
             class="form-control"
             v-model="pass"
@@ -56,7 +56,8 @@
 
 import Swal from "sweetalert2";
 import { loginUsuario } from "@/api/authApi.js";
-import * as jwtDecode from "jwt-decode";
+//import * as jwtDecode from "jwt-decode";
+import { jwtDecode } from "jwt-decode";
 
 export default {
   name: "TablaLogin",
@@ -64,64 +65,57 @@ export default {
     return {
       dni: "",
       pass: "",
-      dniError: "",
-      passError: "",
-      cargando: false,
     };
   },
-  /*
-  computed: {
-    formularioValido() {
-      return (
-        this.dni.trim().lenght > 0 &&
-        this.pass.trim().length >= 4 &&
-        !this.dniError &&
-        !this.passError
-      );
-    },
-  },
-*/
+
   methods: {
-    validarDNI() {
-      const dniTrimmed = this.dni.trim();
-
-      if (!dniTrimmed) {
-      }
-    },
-
     async iniciarSesion() {
       try {
-        const data = await loginUsuario(this.dni, this.pass);
-        /*
-        this.cargando = true;
-        const data = await loginUsuario(this.dni.trim(), this.pass.trim());
-*/
-        //Guardar token y datos
-
-        // Guardar token y datos del usuario en localStorage
-        localStorage.setItem("token", data.token);
-        localStorage.setItem("userName", data.nombre);
-        localStorage.setItem("isLogueado", "true");
-
-        if (data.tipo === "admin") {
-          localStorage.setItem("isAdmin", "true");
-        } else {
-          localStorage.setItem("isUsuario", "true");
+        this.dni = this.dni.toUpperCase().trim();
+        this.pass = this.pass.trim();
+        if (this.dni === "" || this.pass === "") {
+          Swal.fire({
+            title: "Campos vacíos",
+            text: "Por favor, complete ambos campos.",
+            icon: "warning",
+            confirmButtonText: "Aceptar",
+          });
+          return;
         }
+
+        const data = await loginUsuario(this.dni, this.pass);
+
+        const decoded = jwtDecode(data.token);
+
+        // Guardar token y datos del usuario en sessionStorage o sessionStorage
+        sessionStorage.setItem("token", data.token);
+        sessionStorage.setItem("isLogueado", "true");
+        sessionStorage.setItem(
+          "isAdmin",
+          decoded.tipo === "admin" ? "true" : "false"
+        );
+        sessionStorage.setItem(
+          "isUser",
+          decoded.tipo !== "admin" ? "true" : "false"
+        );
+        sessionStorage.setItem("userName", data.nombre);
+        sessionStorage.setItem("userDNI", this.dni);
+
+        // Redirigir al inicio y recargar para que Navbar se actualice
+        this.$router
+          .push({ name: "Inicio" })
+          .then(() => window.location.reload());
 
         Swal.fire({
           title: "Bienvenido",
           text: `Hola ${data.nombre}`,
           icon: "success",
           showConfirmButton: false,
-          timer: 2000,
+          timer: 3000,
         });
         // Redirigir a la página de inicio y recargar con $router
         // $router se usa para evitar problemas de historial en SPA
         // window.location.reload() recarga la página para reflejar el estado autenticado
-        this.$router
-          .push({ name: "Inicio" })
-          .then(() => window.location.reload());
       } catch (error) {
         console.error("Error en iniciarSesion:", error);
         Swal.fire({
@@ -131,10 +125,6 @@ export default {
           confirmButtonText: "Aceptar",
         });
       }
-    },
-    // Función única: capitaliza y asigna en el mismo paso
-    capitalizarTexto() {
-      this.dni = this.dni.toUpperCase().trim();
     },
   },
 };

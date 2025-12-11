@@ -1,7 +1,7 @@
 <template>
   <div class="container my-5">
     <!-- 📰 FORMULARIO PARA AÑADIR NOTICIA -->
-    <div class="card shadow-sm p-4 mb-5">
+    <div v-if="isAdmin" class="card shadow-sm p-4 mb-5">
       <h4
         class="text-center my-2 bg-`primary-subtle py-1 border bg-primary bg-opacity-25 text-primary p-3 rounded"
       >
@@ -115,11 +115,15 @@ const PREVIEW_LIMIT = 128;
 const nuevoTitulo = ref("");
 const nuevoContenido = ref("");
 const noticias = ref([]);
+// Track if user is admin
+const isAdmin = ref(false);
 const isExpanded = ref({});
 
+//
 onMounted(async () => {
   const res = await fetch("http://localhost:3000/noticias");
   noticias.value = await res.json();
+  isAdmin.value = sessionStorage.getItem("isAdmin") === "true";
 });
 
 const noticiasOrdenadas = computed(() =>
