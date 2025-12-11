@@ -8,7 +8,9 @@ import CitasTaller from "../components/CitasTaller.vue";
 import ModeLos from "../components/ModeLos.vue";
 import VenTas from "../components/VenTas.vue";
 import TablaLogin from "../components/TablaLogin.vue";
+import Contacto from "../components/ConTacto.vue";
 import { createRouter, createWebHistory } from "vue-router";
+import ConTacto from "../components/ConTacto.vue";
 
 const routes = [
   {
@@ -61,11 +63,35 @@ const routes = [
     name: "TablaLogin",
     component: TablaLogin,
   },
+  {
+    path: "/contacto",
+    name: "ConTacto",
+    component: ConTacto,
+  },
 ];
 
 const router = createRouter({
   history: createWebHistory(),
   routes,
+});
+
+router.beforeEach(async (to, from, next) => {
+  const token = sessionStorage.getItem("token");
+
+  // Si la ruta requiere ser admin
+  if (to.meta.requiresAdmin) {
+    // Si no hay token → al login
+    if (!token) return next({ name: "Login" });
+
+    // Consultar al backend si es admin
+    const admin = await esAdmin();
+
+    if (!admin) {
+      return next({ name: "Inicio" }); // acceso denegado
+    }
+  }
+
+  next();
 });
 
 export default router;

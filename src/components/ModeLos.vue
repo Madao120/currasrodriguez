@@ -345,13 +345,13 @@
         </tr>
       </thead>
       <tbody>
-        <tr class="text-center">
-          <td>{{ vehiculo.tipo }}</td>
-          <td>{{ vehiculo.marca }}</td>
-          <td>{{ vehiculo.modelo }}</td>
-          <td>{{ vehiculo.anio }}</td>
-          <td>{{ vehiculo.precio }}</td>
-          <td>{{ vehiculo.estado }}</td>
+        <tr v-for="(a, i) in articulos" :key="a._id || i" class="text-center">
+          <td>{{ a.matricula || a._id || i + 1 }}</td>
+          <td>{{ a.marca }}</td>
+          <td>{{ a.modelo }}</td>
+          <td>{{ a.anio }}</td>
+          <td>{{ a.precio }}</td>
+          <td>{{ a.estado }}</td>
         </tr>
       </tbody>
     </table>
@@ -360,8 +360,8 @@
 
 <script setup>
 import Swal from "sweetalert2";
-import { ref, computed, watch } from "vue";
-import { addArticulo } from "@/api/articulos.js";
+import { ref, computed, watch, onMounted } from "vue";
+import { addArticulo, getArticulos } from "@/api/articulos.js";
 
 const vehiculo = ref({
   tipo: "",
@@ -438,6 +438,17 @@ const municipiosFiltrados = computed(() =>
   municipios.value.filter((m) => m.prov === vehiculo.value.ubicacion.provincia)
 );
 
+// Lista de artículos (vehículos) desde el backend
+const articulos = ref([]);
+
+onMounted(async () => {
+  try {
+    articulos.value = await getArticulos();
+  } catch (err) {
+    console.error("Error cargando articulos:", err);
+  }
+});
+
 // const tiposVehiculo = ref(["coche", "moto", "furgoneta", "camión"]);
 // const tiposCombustible = ref(["gasolina", "diésel", "híbrido", "eléctrico"]);
 
@@ -454,6 +465,10 @@ const guardarVehiculo = async () => {
     formData.append("vehiculo", JSON.stringify(vehiculo.value));
 
     const nuevo = await addArticulo(formData);
+    // Si se ha creado, volver a recargar la lista
+    if (nuevo && nuevo._id) {
+      articulos.value = await getArticulos();
+    }
 
     if (nuevo && nuevo._id) {
       Swal.fire({

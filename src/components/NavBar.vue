@@ -54,7 +54,9 @@
               <router-link to="/ventas" class="nav-link">Ventas</router-link>
             </li>
             <li class="nav-item">
-              <router-link to="/#" class="nav-link">Contacto</router-link>
+              <router-link to="/contacto" class="nav-link"
+                >Contacto</router-link
+              >
             </li>
           </ul>
         </div>
@@ -65,12 +67,13 @@
             userName
           }}</span>
           <button
-            class="btn btn-primary dropdown-toggle"
+            class="btn btn-primary dropdown-toggle d-flex align-items-center"
             type="button"
             data-bs-toggle="dropdown"
             aria-expanded="false"
           >
-            <i class="bi bi-person fs-2"></i>
+            <i class="bi bi-person fs-2 me-2"></i>
+            <span v-if="isLogueado" class="fw-semibold">{{ userName }}</span>
           </button>
           <ul class="dropdown-menu dropdown-menu-end">
             <!-- Mostra “Acceso/Registro” se NON hai usuario logueado -->

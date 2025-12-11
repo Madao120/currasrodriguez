@@ -40,6 +40,11 @@ const vehiculos = ref([]);
 
 onMounted(async () => {
     vehiculos.value = await getArticulos();
+    for (const element of vehiculos.value) {
+        console.log(element.imagen);
+        
+        
+    }
 });
 
 const urlImagen = (ruta) => {

@@ -4,8 +4,12 @@ const API_URL = "http://localhost:5000/api/articulos";
 
 // Obtener todos los artículos
 export async function getArticulos() {
-  const res = await axios.get(API_URL);
-  return res.data;
+  try {
+    const res = await axios.get(API_URL);
+    return res.data;
+  } catch (error) {
+    console.error("Error en api1", error);
+  }
 }
 
 // Obtener artículo por ID

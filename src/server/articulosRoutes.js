@@ -36,8 +36,12 @@ const upload = multer({ storage: storage });
 
 // Definir rutas
 router.get("/", async (req, res) => {
-  const articulos = await Articulo.find();
-  res.json(articulos);
+  try {
+    const articulos = await Articulo.find();
+    res.json(articulos);
+  } catch (error) {
+    console.error(error);
+  }
 });
 
 // Ruta para crear artículo con imagen

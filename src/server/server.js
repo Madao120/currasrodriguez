@@ -6,6 +6,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import authRoutes from "./authRoutes.js"; // ruta al router backend de autenticación
 import articulosRoutes from "./articulosRoutes.js"; // ruta al router backend de artículos
+import contactosRoutes from "../api/contacto.js"; // ruta al router backend de contactos
 
 // Cargar variables de entorno
 dotenv.config();
@@ -19,13 +20,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // Middleware
-app.use(
-  cors({
-    origin: "http://localhost:5173",
-    credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE"],
-  })
-);
+app.use(cors());
 
 // Servir uploads como estáticos (asegúrate de que la carpeta exista)
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
@@ -51,3 +46,8 @@ if (process.env.MONGODB_URI) {
 app.listen(PORT, () => {
   console.log(`Server Express está corriendo en el puerto: ${PORT}`);
 });
+
+//Contactos
+app.use("/api/contactos", contactosRoutes);
+
+console.log("Server abierto en el puerto 5000");
