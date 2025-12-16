@@ -239,6 +239,7 @@
               >Contraseña:</label
             >
             <input
+              :disabled="isAdmin"
               type="password"
               id="pass"
               v-model="nuevoCliente.password"
@@ -254,6 +255,7 @@
               >Repetir Contraseña:</label
             >
             <input
+              :disabled="isAdmin"
               type="password"
               id="pass2"
               v-model="nuevoCliente.password2"
@@ -262,7 +264,7 @@
             />
           </div>
         </div>
-        <div class="d-flex align-tiems-center justify-content-center mt-2">
+        <div class="d-flex align-tiems-center justify-content-center m-4">
           <input
             class="form-check-input me-1"
             type="checkbox"
@@ -295,7 +297,7 @@
         </div>
 
         <!-- Checkbox al final (alineado a la derecha) -->
-        <div class="form-check form-switch ms-auto">
+        <div v-if="isAdmin" class="form-check form-switch ms-auto">
           <input
             type="checkbox"
             id="historico"
@@ -502,7 +504,10 @@ const cargarClientes = () => {
 /////// GUARDAR CLIENTE COMPLETO
 const guardarCliente = async () => {
   // Validación de contraseñas: si no coinciden, mostrar error y cancelar
-  if (nuevoCliente.value.password !== nuevoCliente.value.password2) {
+  if (
+    nuevoCliente.value.password !== nuevoCliente.value.password2 &&
+    editando.value === false
+  ) {
     Swal.fire({
       icon: "error",
       title: "La contraseña no es la misma",

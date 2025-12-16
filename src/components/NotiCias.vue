@@ -43,7 +43,12 @@
     </div>
 
     <!-- 🗞️ LISTA DE NOTICIAS EXISTENTES -->
-    <h5 class="text-center mb-3">NOTICIAS PUBLICADAS</h5>
+    <h2
+      class="w-100 text-center my-2 bg-`primary-subtle py-1 border bg-primary bg-opacity-25 text-primary p-3 rounded"
+    >
+      <i class="bi bi-newspaper"></i>
+      NOTICIAS PUBLICADAS
+    </h2>
 
     <!-- Si hay noticias mostramos la tabla, si no mostramos un mensaje -->
     <div v-if="noticiasOrdenadas.length">
@@ -86,6 +91,7 @@
 
                   <!-- Botón eliminar: ahora justo a la derecha del enlace -->
                   <button
+                    v-if="isAdmin"
                     class="btn btn-sm btn-outline-danger"
                     @click="eliminarNoticia(noticia.id)"
                   >

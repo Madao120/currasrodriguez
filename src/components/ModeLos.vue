@@ -96,13 +96,18 @@
             <label for="anio" class="form-label mb-0 me-3 text-nowrap"
               >Año:</label
             >
-            <input
-              type="text"
+            <select
               id="anio"
               v-model="vehiculo.anio"
-              class="form-control rounded-0 shadow-none border"
+              class="form-select rounded-0 shadow-none border"
               required
-            />
+            >
+              <!--copilot-->
+              <option disabled value="">Seleccione</option>
+              <option v-for="yr in years" :key="yr" :value="yr">
+                {{ yr }}
+              </option>
+            </select>
           </div>
         </div>
 
@@ -347,12 +352,12 @@
         </div>
       </form>
       <table
-        v-if="admin"
+        v-if="isAdmin"
         class="table table-bordered table-striped table-sm table-hover align-middle"
       >
         <thead>
           <tr class="table-primary text-center">
-            <th>ID</th>
+            <th>Matricula</th>
             <th>Marca</th>
             <th>Modelo</th>
             <th>Año</th>
@@ -457,6 +462,10 @@ const municipios = ref([
 const municipiosFiltrados = computed(() =>
   municipios.value.filter((m) => m.prov === vehiculo.value.ubicacion.provincia)
 );
+
+// Años para el select: desde el año actual hasta 55 años atrás COPILOT
+const currentYear = new Date().getFullYear();
+const years = ref(Array.from({ length: 56 }, (_, i) => currentYear - i));
 
 // Lista de artículos (vehículos) desde el backend
 const articulos = ref([]);

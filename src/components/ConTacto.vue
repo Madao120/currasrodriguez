@@ -1,14 +1,14 @@
 <template>
   <div class="container-fluid my-5">
     <div class="row justify-content-center">
+      <div class="d-flex justify-content-center">
+        <h2
+          class="w-100 text-center my-2 bg-`primary-subtle py-1 border bg-primary bg-opacity-25 text-primary p-3 rounded"
+        >
+          <i class="bi bi-envelope-open"></i> Formulario de Contacto
+        </h2>
+      </div>
       <div class="col-12 col-md-8 col-lg-6">
-        <div class="d-flex justify-content-center">
-          <h2
-            class="text-center my-2 bg-`primary-subtle py-1 border bg-primary bg-opacity-25 text-primary p-3 rounded"
-          >
-            <i class="bi bi-envelope-open"></i> Formulario de Contacto
-          </h2>
-        </div>
         <div class="card shadow-sm border-0">
           <div class="card-body p-4">
             <form @submit.prevent="enviarFormulario">

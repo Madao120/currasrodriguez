@@ -1,5 +1,5 @@
 <template>
-    <div class="container-fluid mt-2">
+    <div class="container-fluid mt-4 mb-4">
         <div class="row g-4">
             <div 
             v-for="car in vehiculos"
