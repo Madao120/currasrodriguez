@@ -347,6 +347,13 @@
               >
                 Eliminar
               </button>
+              <button
+                type="button"
+                @click="imprimirPDF"
+                class="btn btn-secondary ms-2 px-4 py-2 btn-sm rounded-0 border shadow-none"
+              >
+                <i class="bi bi-printer"></i>Imprimir
+              </button>
             </div>
           </div>
         </div>
@@ -366,13 +373,27 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="(a, i) in articulos" :key="a._id || i" class="text-center">
-            <td>{{ a.matricula || a._id || i + 1 }}</td>
-            <td>{{ a.marca }}</td>
-            <td>{{ a.modelo }}</td>
-            <td>{{ a.anio }}</td>
-            <td>{{ a.precio }}</td>
-            <td>{{ a.estado }}</td>
+          <tr v-for="modelo in vehiculos" :key="modelo._id" class="text-center">
+            <td>{{ modelo.matricula }}</td>
+            <td>{{ modelo.marca }}</td>
+            <td>{{ modelo.modelo }}</td>
+            <td>{{ modelo.estado }}</td>
+            <td>
+              <div>
+                {{ modelo.contacto.nombre }} {{ modelo.contacto.telefono }}
+              </div>
+            </td>
+            <td>
+              <button
+                class="btn btn-sm btn-primary me-2"
+                @click="
+                  editando = true;
+                  vehiculo = { ...modelo };
+                "
+              >
+                <i class="bi bi-pencil"></i>
+              </button>
+            </td>
           </tr>
         </tbody>
       </table>
@@ -384,10 +405,14 @@
 import Swal from "sweetalert2";
 import { ref, computed, watch, onMounted } from "vue";
 import { addArticulo, getArticulos } from "@/api/articulos.js";
+import provmuniData from "@/data/provmuni.json";
+import { jsPDF } from "jspdf";
+import autoTable from "jspdf-autotable";
 
 // Check if user is admin
 const isAdmin = ref(sessionStorage.getItem("isAdmin") === "true");
 
+const vehiculos = ref([]);
 const vehiculo = ref({
   tipo: "",
   marca: "",
@@ -471,11 +496,7 @@ const years = ref(Array.from({ length: 56 }, (_, i) => currentYear - i));
 const articulos = ref([]);
 
 onMounted(async () => {
-  try {
-    articulos.value = await getArticulos();
-  } catch (err) {
-    console.error("Error cargando articulos:", err);
-  }
+  vehiculos.value = await getArticulos();
 });
 
 // const tiposVehiculo = ref(["coche", "moto", "furgoneta", "camión"]);
@@ -540,6 +561,40 @@ const guardarVehiculo = async () => {
   } catch (error) {
     console.error("Error al guardar:", error);
   }
+};
+
+// Imprimir PDF
+const imprimirPDF = () => {
+  const doc = new jsPDF();
+
+  doc.setFontSize(18);
+  doc.text("Listado de Vehículos", 14, 20);
+
+  const headers = [
+    "Matrícula",
+    "Marca",
+    "Modelo",
+    "Estado",
+    "Combustible",
+    "Precio",
+  ];
+
+  autoTable(doc, {
+    startY: 30,
+    head: [headers],
+    body: vehiculos.value.map((modelo) => [
+      modelo.matricula,
+      modelo.marca,
+      modelo.modelo,
+      modelo.estado,
+      modelo.combustible,
+      modelo.precio,
+    ]),
+    theme: "striped",
+    styles: { fontSize: 10 },
+  });
+
+  doc.save("listado_vehiculos.pdf");
 };
 </script>
 <style></style>
