@@ -2,13 +2,14 @@ import NotFound from "../components/NotFound.vue";
 import PaginaInicio from "../components/PaginaInicio.vue";
 import GestionClientes from "../components/GestionClientes.vue";
 import NotiCias from "../components/NotiCias.vue";
+import BusCar from "../components/BusCar.vue";
 import AvisoLegal from "../components/AvisoLegal.vue";
 import PoliticaPrivacidad from "../components/PoliticaPrivacidad.vue";
 import CitasTaller from "../components/CitasTaller.vue";
 import ModeLos from "../components/ModeLos.vue";
 import VenTas from "../components/VenTas.vue";
 import TablaLogin from "../components/TablaLogin.vue";
-import Contacto from "../components/ConTacto.vue";
+
 import { createRouter, createWebHistory } from "vue-router";
 import ConTacto from "../components/ConTacto.vue";
 
@@ -24,9 +25,9 @@ const routes = [
     component: GestionClientes,
   },
   {
-    path: "/:pathMatch(.*)*",
-    name: "NotFound",
-    component: NotFound,
+    path: "/buscar",
+    name: "BusCar",
+    component: BusCar,
   },
   {
     path: "/noticias",
@@ -67,6 +68,11 @@ const routes = [
     path: "/contacto",
     name: "ConTacto",
     component: ConTacto,
+  },
+  {
+    path: "/:pathMatch(.*)*",
+    name: "NotFound",
+    component: NotFound,
   },
 ];
 

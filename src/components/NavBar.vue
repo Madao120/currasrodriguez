@@ -61,6 +61,25 @@
           </ul>
         </div>
 
+        <!-- BUSCADOR alineado a la derecha -->
+        <form
+          class="d-flex ms-auto me-2"
+          role="search"
+          @submit.prevent="buscar"
+        >
+          <input
+            class="form-control form-control-sm me-2 rounded-0"
+            type="search"
+            placeholder="Buscar..."
+            aria-label="Buscar"
+            v-model="query"
+            style="width: 140px"
+          />
+          <button class="btn btn-light btn-sm rounded-0" type="submit">
+            <i class="bi bi-search"></i>
+          </button>
+        </form>
+
         <!-- Dropdown de acceso/registro -->
         <div class="dropdown ms-auto align-items-center d-flex">
           <span
@@ -106,6 +125,21 @@
 
 <script setup>
 import { ref, onMounted } from "vue";
+import { useRouter } from "vue-router";
+import { esAdmin } from "@/api/authApi.js";
+
+const router = useRouter();
+const query = ref(""); // IMPORTANTE: esto evita el warning
+
+// Función que se llama al hacer submit en el buscador
+function buscar() {
+  if (!query.value.trim()) return;
+  router.push({
+    name: "BusCar",
+    query: { q: query.value.trim() },
+  });
+  query.value = ""; // opcional: limpiar input después de enviar
+}
 
 const isLogueado = ref(false);
 const isAdmin = ref(false);

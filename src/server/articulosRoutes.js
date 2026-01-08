@@ -44,6 +44,23 @@ router.get("/", async (req, res) => {
   }
 });
 
+//BUSCADOR DE NAVBAR
+router.get("/buscar", async (req, res) => {
+  const { q } = req.query;
+  if (!q) return res.json([]);
+
+  const regex = new RegExp(q, "i");
+  // supongamos solo la marca modelo y descripción
+  try {
+    const articulos = await Articulo.find({
+      $or: [{ marca: regex }, { modelo: regex }, { descripcion: regex }],
+    });
+    res.json(articulos);
+  } catch (err) {
+    res.status(500).json({ error: "Error en la búsqueda" });
+  }
+});
+
 // Ruta para crear artículo con imagen
 router.post("/", upload.single("imagen"), async (req, res) => {
   try {
