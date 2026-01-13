@@ -80,6 +80,22 @@
           </button>
         </form>
 
+        <!-- CESTA DE LA COMPRA-->
+        <router-link
+          to="/cesta"
+          class="btn btn-primary position-relative ms-3 me-2"
+          title="Cesta"
+        >
+          <i class="bi bi-cart3 fs-4"></i>
+          <!-- Badge con el número de productos-->
+          <span
+            class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+            v-if="cestaStore.totalItems > 0"
+          >
+            {{ cestaStore.totalItems }}
+          </span>
+        </router-link>
+
         <!-- Dropdown de acceso/registro -->
         <div class="dropdown ms-auto align-items-center d-flex">
           <span
@@ -127,6 +143,9 @@
 import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { esAdmin } from "@/api/authApi.js";
+
+import { useCestaStore } from "@/store/cesta.js";
+const cestaStore = useCestaStore();
 
 const router = useRouter();
 const query = ref(""); // IMPORTANTE: esto evita el warning

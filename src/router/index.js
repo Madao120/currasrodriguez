@@ -9,6 +9,7 @@ import CitasTaller from "../components/CitasTaller.vue";
 import ModeLos from "../components/ModeLos.vue";
 import VenTas from "../components/VenTas.vue";
 import TablaLogin from "../components/TablaLogin.vue";
+import CesTa from "../components/CesTa.vue";
 
 import { createRouter, createWebHistory } from "vue-router";
 import ConTacto from "../components/ConTacto.vue";
@@ -68,6 +69,11 @@ const routes = [
     path: "/contacto",
     name: "ConTacto",
     component: ConTacto,
+  },
+  {
+    path: "/cesta",
+    name: "CesTa",
+    component: CesTa,
   },
   {
     path: "/:pathMatch(.*)*",
