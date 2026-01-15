@@ -46,10 +46,14 @@
           </tr>
         </tbody>
       </table>
-      <div class="d-flex justify-content-between align-items-center mt-3">
-        <h5>Total: {{ cesta.totalPrecio }} €</h5>
-        <button class="btn btn-success" @click="iniciarPago">
-          Iniciar Pago
+      <div class="text-end mt-3">
+        <h4>Total: {{ formatoPrecio(totalPrice) }}</h4>
+        <button
+          class="btn btn-success"
+          @click="iniciarPago"
+          :disabled="cartItems.length == 0"
+        >
+          Finalizar Compra
         </button>
       </div>
     </div>
@@ -65,10 +69,33 @@ const incrementar = (id) => cesta.incrementar(id);
 const decrementar = (id) => cesta.decrementar(id);
 const removeProducto = (id) => cesta.removeProducto(id);
 
-const iniciarPago = () => {
-  // Aquí llamarías a tu pasarela de pago
-  // Por ejemplo, redirigir a URL de pago o abrir modal
-  console.log("Redirigiendo a pasarela de pago...");
-  // window.location.href = "URL DE PASARELA"
+// Iniciar pago con Stripe usando axios
+const iniciarPago = async () => {
+  if (!cesta.items.length) {
+    mostrarAlerta("Aviso", "La cesta está vacia", "warning");
+    return;
+  }
+  try {
+    // Crear la sesión de pago en el backend
+    const response = await axios.post(
+      "http://localhost:5000/crear-checkout-session",
+      {
+        items: cesta.items,
+        amount: cesta.totalPrecio,
+      }
+    );
+    const session = response.data;
+    if (!session.url) {
+      console.error("X No se recibio URL de Stripe.");
+      mostrarAlerta("Error", "No se pudo iniciar el pago", "error");
+      return;
+    }
+    // Redirigir directamente al checkout de Stripe
+    window.location.href = session.url;
+  } catch (error) {
+    console.error("Error en iniciarPago:", error);
+    mostrarAlerta("Error", "No se pudo iniciar el pago", "error");
+  }
 };
 </script>
+<style scoped></style>

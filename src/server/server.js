@@ -7,6 +7,8 @@ import { fileURLToPath } from "url";
 import authRoutes from "./authRoutes.js"; // ruta al router backend de autenticación
 import articulosRoutes from "./articulosRoutes.js"; // ruta al router backend de artículos
 import contactoRoutes from "../api/contacto.js"; // ruta al router backend de contacto
+import Stripe from "stripe";
+import "dotenv/config";
 
 // Cargar variables de entorno
 dotenv.config();
@@ -18,6 +20,40 @@ const PORT = process.env.PORT || 5000;
 // Configurar fileURLToPath
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+// Stripe
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+
+// rute crear sescion checkout
+app.post("/crear-checkout-session", async (req, res) => {
+  try {
+    const { items } = req.body;
+
+    const lineItems = items.map((item) => ({
+      price_data: {
+        currency: "eur",
+        product_data: {
+          name: item.nombre,
+        },
+        unit_amount: Math.round(item.precio * 100), // convertir a centimos
+      },
+      quantity: item.cantidad,
+    }));
+
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ["card"],
+      line_items: lineItems,
+      mode: "payment",
+      success_url: "http://localhost:5173/success", //crear estos componentes en frontend
+      cancel_url: "http://localhost:5173/cancel", //crear estos componentes en frontend
+    });
+
+    res.json({ url: session.url });
+  } catch (error) {
+    console.error("Error creating checkout session:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
 
 // Middleware
 app.use(cors());
