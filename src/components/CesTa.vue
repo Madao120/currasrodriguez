@@ -50,7 +50,7 @@
         <h4>Total: {{ formatoPrecio(totalPrice) }}</h4>
         <button
           class="btn btn-success"
-          @click="iniciarPago"
+          @click="finalizarPago"
           :disabled="cartItems.length == 0"
         >
           Finalizar Compra
@@ -70,7 +70,7 @@ const decrementar = (id) => cesta.decrementar(id);
 const removeProducto = (id) => cesta.removeProducto(id);
 
 // Iniciar pago con Stripe usando axios
-const iniciarPago = async () => {
+const finalizarPago = async () => {
   if (!cesta.items.length) {
     mostrarAlerta("Aviso", "La cesta está vacia", "warning");
     return;
