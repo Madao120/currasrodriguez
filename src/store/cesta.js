@@ -25,7 +25,7 @@ export const useCestaStore = defineStore("cesta", {
     totalPrecio: (state) => {
       return state.items.reduce(
         (total, item) => total + item.precio * item.cantidad,
-        0
+        0,
       );
     },
   },
@@ -58,7 +58,9 @@ export const useCestaStore = defineStore("cesta", {
     },
     // Decrementa la cantidad de un producto, sin permitir que sea menor que 1
     decrementar(id) {
-      const item = this.items.find((item) => item.cantidad > 1);
+      const item = this.items.find(
+        (item) => item.id === id && item.cantidad > 1,
+      );
       if (item) item.cantidad--;
     },
     // Vacía toda la cesta

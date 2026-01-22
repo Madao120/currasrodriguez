@@ -405,7 +405,7 @@
 import Swal from "sweetalert2";
 import { ref, computed, watch, onMounted } from "vue";
 import { addArticulo, getArticulos } from "@/api/articulos.js";
-import provmuniData from "@/data/provmuni.json";
+import provmuniData from "../../backend/data/provmuni.json";
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
 
@@ -446,7 +446,7 @@ watch(
     if (valor) {
       vehiculo.value.matricula = valor.toUpperCase();
     }
-  }
+  },
 );
 
 //Nombre en Primera letra mayúscula Tanto nombre como apellido
@@ -457,7 +457,7 @@ watch(
     vehiculo.value.contacto.nombre = valor
       .toLowerCase()
       .replace(/\b\w/g, (c) => c.toUpperCase());
-  }
+  },
 );
 
 const editando = ref(false);
@@ -485,7 +485,7 @@ const municipios = ref([
 ]);
 
 const municipiosFiltrados = computed(() =>
-  municipios.value.filter((m) => m.prov === vehiculo.value.ubicacion.provincia)
+  municipios.value.filter((m) => m.prov === vehiculo.value.ubicacion.provincia),
 );
 
 // Años para el select: desde el año actual hasta 55 años atrás COPILOT
