@@ -6,7 +6,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import authRoutes from "./authRoutes.js"; // ruta al router backend de autenticación
 import articulosRoutes from "./articulosRoutes.js"; // ruta al router backend de artículos
-import contactoRoutes from "../api/contacto.js"; // ruta al router backend de contacto
+import contactoRoutes from "./contactoRoutes.js"; // ruta al router backend de contacto
 import Stripe from "stripe";
 import "dotenv/config";
 
@@ -20,9 +20,6 @@ const PORT = process.env.PORT || 5000;
 // Configurar fileURLToPath
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-
-// Stripe
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 // rute crear sescion checkout
 app.post("/crear-checkout-session", async (req, res) => {
@@ -85,5 +82,8 @@ app.listen(PORT, () => {
 
 //Contacto
 app.use("/api/contacto", contactoRoutes);
+
+//Configuracon de Stripe carga de la clave secreta
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 console.log("Server abierto en el puerto 5000");

@@ -26,7 +26,9 @@
               :class="{ 'is-invalid': !dniValido }"
               :disabled="editando"
               required
-              oninvalid="this.setCustomValidity('Por favor, rellene este campo')"
+              oninvalid="
+                this.setCustomValidity('Por favor, rellene este campo')
+              "
               oninput="this.setCustomValidity('')"
               style="max-width: 160px"
             />
@@ -85,7 +87,9 @@
               v-model="nuevoCliente.fecha_alta"
               class="form-control"
               required
-              oninvalid="this.setCustomValidity('Por favor, rellene este campo')"
+              oninvalid="
+                this.setCustomValidity('Por favor, rellene este campo')
+              "
               oninput="this.setCustomValidity('')"
               style="max-width: 180px"
             />
@@ -396,7 +400,7 @@
 </template>
 
 <script setup>
-import provmuniData from "@/data/provmuni.json";
+import provmuniData from "../../backend/data/provmuni.json";
 import { ref, onMounted, computed } from "vue";
 import {
   getClientes,
@@ -518,7 +522,7 @@ const guardarCliente = async () => {
   }
   if (nuevoCliente.value.fecha_alta.includes("/")) {
     nuevoCliente.value.fecha_alta = formatearFechaParaInput(
-      nuevoCliente.value.fecha_alta
+      nuevoCliente.value.fecha_alta,
     );
   }
 
@@ -532,7 +536,7 @@ const guardarCliente = async () => {
       (cliente) =>
         cliente.dni === nuevoCliente.value.dni ||
         cliente.movil === nuevoCliente.value.movil ||
-        cliente.email === nuevoCliente.value.email
+        cliente.email === nuevoCliente.value.email,
     );
     if (duplicado) {
       Swal.fire({
@@ -566,11 +570,11 @@ const guardarCliente = async () => {
       // Modificar cliente (PUT)
       const clienteActualizado = await updateCliente(
         clienteEditandoId.value,
-        nuevoCliente.value
+        nuevoCliente.value,
       );
       // Actualiza el cliente en la lista local
       const index = clientes.value.findIndex(
-        (c) => c.id === clienteEditandoId.value
+        (c) => c.id === clienteEditandoId.value,
       );
       if (index !== -1) clientes.value[index] = clienteActualizado;
       Swal.fire({
@@ -641,7 +645,7 @@ const eliminarCliente = async (movil) => {
   clientes.value = await getClientes();
   // Buscar cliente completo (que incluye el ID)
   const clienteAEliminar = clientes.value.find(
-    (cliente) => cliente.movil === movil
+    (cliente) => cliente.movil === movil,
   );
 
   if (!clienteAEliminar) {
@@ -820,7 +824,7 @@ const capitalizarTexto = (propiedad) => {
     .split(" ")
     .map(
       (palabra) =>
-        palabra.charAt(0).toUpperCase() + palabra.slice(1).toLowerCase()
+        palabra.charAt(0).toUpperCase() + palabra.slice(1).toLowerCase(),
     )
     .join(" ");
 };
@@ -837,7 +841,7 @@ const formatearFechaParaInput = (fecha) => {
   // partes = [dd, mm, yyyy]
   return `${partes[2]}-${partes[1].padStart(2, "0")}-${partes[0].padStart(
     2,
-    "0"
+    "0",
   )}`;
 };
 
@@ -950,7 +954,7 @@ const filtrarMunicipios = () => {
 
   // 3️⃣ filtrar los municipios cuyo id empiece por esos dos dígitos
   municipiosFiltrados.value = municipios.value.filter((m) =>
-    m.id.startsWith(codigoProv)
+    m.id.startsWith(codigoProv),
   );
 
   // 4️⃣ opcional: resetear el municipio si ya no corresponde

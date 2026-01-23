@@ -16,7 +16,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="item in cesta.items" key="item.id">
+          <tr v-for="item in cesta.items" :key="item.id">
             <td>{{ item.nombre }}</td>
             <td>{{ item.precio }} €</td>
             <td>
@@ -45,23 +45,27 @@
             </td>
           </tr>
         </tbody>
+        <tfoot>
+          <tr class="fw-bold">
+            <td colspan="3" class="text-end">Total</td>
+            <td>{{ cesta.totalPrecio }} €</td>
+            <td>
+              <button
+                class="btn btn-success btn-sm justify-content-end px-3"
+                @click="iniciarPago"
+              >
+                Pago
+              </button>
+            </td>
+          </tr>
+        </tfoot>
       </table>
-      <div class="text-end mt-3">
-        <h4>Total: {{ formatoPrecio(totalPrice) }}</h4>
-        <button
-          class="btn btn-success"
-          @click="iniciarPago"
-          :disabled="cartItems.length == 0"
-        >
-          Finalizar Compra
-        </button>
-      </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { useCestaStore } from "../store/cesta.js";
+import { useCestaStore } from "@/store/cesta.js";
 
 const cesta = useCestaStore();
 
@@ -70,7 +74,7 @@ const decrementar = (id) => cesta.decrementar(id);
 const removeProducto = (id) => cesta.removeProducto(id);
 
 // Iniciar pago con Stripe usando axios
-const iniciarPago = async () => {
+const iniciarPago = () => {
   if (!cesta.items.length) {
     mostrarAlerta("Aviso", "La cesta está vacia", "warning");
     return;
@@ -82,9 +86,11 @@ const iniciarPago = async () => {
       {
         items: cesta.items,
         amount: cesta.totalPrecio,
-      }
+      },
     );
+
     const session = response.data;
+
     if (!session.url) {
       console.error("X No se recibio URL de Stripe.");
       mostrarAlerta("Error", "No se pudo iniciar el pago", "error");
@@ -92,6 +98,7 @@ const iniciarPago = async () => {
     }
     // Redirigir directamente al checkout de Stripe
     window.location.href = session.url;
+
   } catch (error) {
     console.error("Error en iniciarPago:", error);
     mostrarAlerta("Error", "No se pudo iniciar el pago", "error");
