@@ -82,6 +82,10 @@ const iniciarPago = async () => {
     return;
   }
   try {
+    // GUARDAR LA CESTA EN LOCALSTORAGE ANTES DE REDIRIGIR
+    cesta.guardarCestaLocalStorage();
+    console.log("Cesta guardada en localStorage");
+
     // Crear la sesión de pago en el backend
     const response = await axios.post(
       "http://localhost:5000/crear-checkout-session",

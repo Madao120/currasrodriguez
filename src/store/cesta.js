@@ -66,6 +66,25 @@ export const useCestaStore = defineStore("cesta", {
     // Vacía toda la cesta
     clearCesta() {
       this.items = [];
+      localStorage.removeItem('carritoPago');
+    },
+    // Guarda la cesta en localStorage para persistencia
+    guardarCestaLocalStorage() {
+      localStorage.setItem('carritoPago', JSON.stringify(this.items));
+    },
+    // Recupera la cesta desde localStorage
+    recuperarCestaLocalStorage() {
+      const carrito = localStorage.getItem('carritoPago');
+      if (carrito) {
+        try {
+          this.items = JSON.parse(carrito);
+          return true;
+        } catch (error) {
+          console.error('Error recuperando carrito:', error);
+          return false;
+        }
+      }
+      return false;
     },
   },
 });
