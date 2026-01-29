@@ -1,30 +1,61 @@
+import "dotenv/config";
+import dotenv from "dotenv";
+dotenv.config();
+
 import express from "express";
 import cors from "cors";
 import mongoose from "mongoose";
-import dotenv from "dotenv";
 import path from "path";
 import { fileURLToPath } from "url";
-import authRoutes from "./authRoutes.js"; // ruta al router backend de autenticación
-import articulosRoutes from "./articulosRoutes.js"; // ruta al router backend de artículos
-import contactoRoutes from "./contactoRoutes.js"; // ruta al router backend de contacto
 import Stripe from "stripe";
-import "dotenv/config";
 
-// Cargar variables de entorno
-dotenv.config();
+import authRoutes from "./authRoutes.js";
+import articulosRoutes from "./articulosRoutes.js";
+import contactoRoutes from "./contactoRoutes.js";
 
-// Crear app
+// -----------------------------
+// CONFIGURACIÓN BÁSICA
+// -----------------------------
+
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Configurar fileURLToPath
+// Stripe
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+
+// Resolver __dirname en ES Modules
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// rute crear sescion checkout
+// -----------------------------
+// MIDDLEWARES (SIEMPRE PRIMERO)
+// -----------------------------
+
+app.use(
+  cors({
+    origin: "http://localhost:5173",
+    methods: ["GET", "POST"],
+    allowedHeaders: ["Content-Type"],
+  }),
+);
+
+app.use(express.json());
+
+// Servir uploads como estáticos
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+
+// -----------------------------
+// RUTA STRIPE CHECKOUT
+// -----------------------------
+
 app.post("/crear-checkout-session", async (req, res) => {
   try {
     const { items } = req.body;
+    console.log("Items recibidos para checkout:", items);
+
+    if (!items || !items.length) {
+      return res.status(400).json({ error: "No hay items en la cesta" });
+    }
 
     const lineItems = items.map((item) => ({
       price_data: {
@@ -32,7 +63,7 @@ app.post("/crear-checkout-session", async (req, res) => {
         product_data: {
           name: item.nombre,
         },
-        unit_amount: Math.round(item.precio * 100), // convertir a centimos
+        unit_amount: Math.round(item.precio * 100), // céntimos
       },
       quantity: item.cantidad,
     }));
@@ -41,49 +72,42 @@ app.post("/crear-checkout-session", async (req, res) => {
       payment_method_types: ["card"],
       line_items: lineItems,
       mode: "payment",
-      success_url: "http://localhost:5173/success", //crear estos componentes en frontend
-      cancel_url: "http://localhost:5173/cancel", //crear estos componentes en frontend
+      success_url: "http://localhost:5173/success",
+      cancel_url: "http://localhost:5173/cancel",
     });
 
     res.json({ url: session.url });
   } catch (error) {
-    console.error("Error creating checkout session:", error);
-    res.status(500).json({ error: "Internal Server Error" });
+    console.error("❌ Error creando sesión de Stripe:", error);
+    res.status(500).json({ error: "Error creando sesión de pago" });
   }
 });
 
-// Middleware
-app.use(cors());
+// -----------------------------
+// OTRAS RUTAS DE TU APP
+// -----------------------------
 
-// Servir uploads como estáticos (asegúrate de que la carpeta exista)
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
-
-// Parsear JSON
-app.use(express.json());
-
-// Rutas
 app.use("/api/auth", authRoutes);
 app.use("/api/articulos", articulosRoutes);
+app.use("/api/contacto", contactoRoutes);
 
-// Conexión a MongoDB (opcional si no está configurado)
+// -----------------------------
+// CONEXIÓN MONGODB (OPCIONAL)
+// -----------------------------
+
 if (process.env.MONGODB_URI) {
   mongoose
     .connect(process.env.MONGODB_URI)
-    .then(() => console.log("Connected to MongoDB"))
-    .catch((err) => console.error("Could not connect to MongoDB:", err));
+    .then(() => console.log("✅ Conectado a MongoDB"))
+    .catch((err) => console.error("❌ Error MongoDB:", err));
 } else {
-  console.warn("MONGODB_URI no definido — se omite la conexión a MongoDB");
+  console.warn("⚠️ MONGODB_URI no definido — se omite MongoDB");
 }
 
-// Iniciar servidor
+// -----------------------------
+// INICIAR SERVIDOR
+// -----------------------------
+
 app.listen(PORT, () => {
-  console.log(`Server Express está corriendo en el puerto: ${PORT}`);
+  console.log(`🚀 Server Express corriendo en http://localhost:${PORT}`);
 });
-
-//Contacto
-app.use("/api/contacto", contactoRoutes);
-
-//Configuracon de Stripe carga de la clave secreta
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
-
-console.log("Server abierto en el puerto 5000");

@@ -66,6 +66,8 @@
 
 <script setup>
 import { useCestaStore } from "@/store/cesta.js";
+import axios from "axios";
+import Swal from "sweetalert2";
 
 const cesta = useCestaStore();
 
@@ -74,9 +76,9 @@ const decrementar = (id) => cesta.decrementar(id);
 const removeProducto = (id) => cesta.removeProducto(id);
 
 // Iniciar pago con Stripe usando axios
-const iniciarPago = () => {
+const iniciarPago = async () => {
   if (!cesta.items.length) {
-    mostrarAlerta("Aviso", "La cesta está vacia", "warning");
+    Swal.fire("Aviso", "La cesta está vacia", "warning");
     return;
   }
   try {
@@ -93,15 +95,14 @@ const iniciarPago = () => {
 
     if (!session.url) {
       console.error("X No se recibio URL de Stripe.");
-      mostrarAlerta("Error", "No se pudo iniciar el pago", "error");
+      Swal.fire("Error", "No se pudo iniciar el pago", "error");
       return;
     }
     // Redirigir directamente al checkout de Stripe
     window.location.href = session.url;
-
   } catch (error) {
     console.error("Error en iniciarPago:", error);
-    mostrarAlerta("Error", "No se pudo iniciar el pago", "error");
+    Swal.fire("Error", "No se pudo iniciar el pago", "error");
   }
 };
 </script>
