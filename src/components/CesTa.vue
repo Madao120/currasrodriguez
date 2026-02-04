@@ -68,23 +68,30 @@
 import { useCestaStore } from "@/store/cesta.js";
 import axios from "axios";
 import Swal from "sweetalert2";
+// import isLogueado from "./NavBar.vue";
 
 const cesta = useCestaStore();
 
-const incrementar = (id) => cesta.incrementar(id);
-const decrementar = (id) => cesta.decrementar(id);
+const incrementar = (id) => cesta.incrementarCantidad(id);
+const decrementar = (id) => cesta.decrementarCantidad(id);
 const removeProducto = (id) => cesta.removeProducto(id);
 
 // Iniciar pago con Stripe usando axios
 const iniciarPago = async () => {
   if (!cesta.items.length) {
-    Swal.fire("Aviso", "La cesta está vacia", "warning");
+    Swal.fire("Aviso", "La cesta está vacía", "warning");
     return;
   }
+  if (sessionStorage.getItem("token") === null) {
+    Swal.fire("Aviso", "Debes iniciar sesión para realizar el pago", "warning");
+    return;
+  }
+  /*if(!isLogueado){
+    Swal.fire("Aviso", "Debes iniciar sesión para realizar el pago", "warning");
+    return;
+  } */
   try {
-    // GUARDAR LA CESTA EN LOCALSTORAGE ANTES DE REDIRIGIR
-    cesta.guardarCestaLocalStorage();
-    console.log("Cesta guardada en localStorage");
+    console.log("Compra completada y guardada");
 
     // Crear la sesión de pago en el backend
     const response = await axios.post(

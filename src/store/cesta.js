@@ -1,90 +1,113 @@
-// Importamos la función defineStore de Pinia
-// que nos permite crear un store que puede ser usado en cualquier componente
 import { defineStore } from "pinia";
+import { ref, computed, watch } from "vue";
 
-// Creamos el store de la cesta
-// 'cesta' es el id del store, usado internamente por Pinia
-export const useCestaStore = defineStore("cesta", {
-  // STATE IMPORTANTE
-  state: () => ({
-    // Array que contendrá los productos que el usuario añada a la cesta
-    items: [],
-  }),
+//Creamos un objeto que utilice la dependencia Pinia y le asignamos los datos y los métodos que tendrá.
+export const useCestaStore = defineStore("cesta", () => {
+  // Creamos un objeto reactivo que almacenará los items que añadimos/quitamos de la cesta para ir cambiando su valor en ejecución
+  const items = ref([]);
+  //Segundo array vacío para que, al pagar, deje de verse visualmente la lista pero se mantenga para la factura.
+  const compraCompleta = ref([]);
 
-  // GETTERS
-  getters: {
-    // Calcula el total de productos en la cesta
-    // Reduce el array sumando la propiedad 'cantidad' de cada producto
-    totalItems: (state) => {
-      return state.items.reduce((total, item) => total + item.cantidad, 0);
-    },
+  //Conseguir el número total de items añadidos a la lista
+  //total es el valor previo, empieza en 0 por el ultimo dato pasado a la funcion
+  const totalItems = computed(() => {
+    if (!Array.isArray(items.value)) return 0;
+    return items.value.reduce((total, item) => total + (item.cantidad || 0), 0);
+  });
 
-    // Calcula el precio total de la cesta
-    // Suma el precio de cada producto multiplicado por su cantidad
-    // AQUÍ SE PODRÍA AÑADIR LÓGICA DE DESCUENTOS, IMPUESTOS, ETC.
-    totalPrecio: (state) => {
-      return state.items.reduce(
-        (total, item) => total + item.precio * item.cantidad,
-        0,
-      );
-    },
-  },
+  //Calcula el precio total de todos los productos
+  const totalPrecio = computed(() => {
+    //Vemos si la lista principal esta vacia, si lo está, usamos la otra
+    const currentList =
+      items.value.length > 0 ? items.value : compraCompleta.value;
+    if (!Array.isArray(currentList)) return 0;
 
-  // ACTIONS 2ª imagen
-  actions: {
-    // Añade un producto a la cesta
-    addProducto(producto) {
-      // Buscamos si el producto ya está en la cesta
-      const existente = this.items.find((item) => item.id === producto.id);
-      if (existente) {
-        // Si ya existe, incrementamos la cantidad del mismo producto
-        existente.cantidad++;
-      } else {
-        // Si no existe, lo añadimos con cantidad inicial 1
-        this.items.push({
-          ...producto, // copiamos todas las propiedades del producto
-          cantidad: 1,
-        });
-      }
+    return currentList.reduce(
+      (total, item) => total + item.precio * (item.cantidad || 0),
+      0,
+    );
+  });
+
+  //Copua la lista a la lista para la factura y vacia la original(para visual)
+  function completarCompra() {
+    if (items.value.length > 0) {
+      compraCompleta.value = [...items.value];
+      items.value = [];
+    }
+  }
+  // Acción que añade un producto a la lista, y si ya existe, solo aumente su cantidad
+  function addProducto(producto) {
+    const existente = items.value.find((item) => item.id === producto.id);
+    if (existente) {
+      existente.cantidad = (existente.cantidad || 0) + 1;
+    } else {
+      items.value.push({
+        ...producto,
+        cantidad: 1,
+      });
+    }
+  }
+
+  //Funcion que elimina un producto de la lista
+  function removeProducto(id) {
+    const index = items.value.findIndex((item) => item.id === id);
+    if (index > -1) {
+      items.value.splice(index, 1); //splice MANTIENE reactividad
+    }
+  }
+
+  //Aumenta la cantidad de un producto en base a su id
+  function incrementarCantidad(id) {
+    const item = items.value.find((item) => item.id === id);
+    if (item) item.cantidad++;
+  }
+
+  //Funcion que reduce la cantidad de un item en concreto, si el item existe pero la cantidad es menor a 1, lo borra
+  function decrementarCantidad(id) {
+    const item = items.value.find((item) => item.id === id);
+    if (item && item.cantidad > 1) {
+      item.cantidad--;
+    } else if (item) {
+      removeProducto(id);
+    }
+  }
+
+  //Vacías la cesta y borra el sessionStorage(vacío real)
+  function clearCesta() {
+    items.value = [];
+    compraCompleta.value = [];
+    sessionStorage.removeItem("items");
+  }
+
+  //Cuando se crea el objeto mira si hay un items en el sessionStorage, si lo hay le asigna el valor a items.
+  const itemsData = sessionStorage.getItem("items");
+  if (itemsData) {
+    try {
+      items.value = JSON.parse(itemsData);
+    } catch (e) {
+      console.error("Error parsing cart:", e);
+    }
+  }
+
+  // Cada vez que un item nuevo entre en items, se cambiara el sessionSotrage para que entre este mismo, newItems es una referencia al array real
+  watch(
+    items,
+    (newItems) => {
+      sessionStorage.setItem("items", JSON.stringify(newItems));
     },
-    // Elimina un producto de la cesta por su id
-    removeProducto(id) {
-      this.items = this.items.filter((item) => item.id !== id);
-    },
-    // Incrementa la cantidad de un producto
-    incrementar(id) {
-      const item = this.items.find((item) => item.id === id);
-      if (item) item.cantidad++;
-    },
-    // Decrementa la cantidad de un producto, sin permitir que sea menor que 1
-    decrementar(id) {
-      const item = this.items.find(
-        (item) => item.id === id && item.cantidad > 1,
-      );
-      if (item) item.cantidad--;
-    },
-    // Vacía toda la cesta
-    clearCesta() {
-      this.items = [];
-      localStorage.removeItem('carritoPago');
-    },
-    // Guarda la cesta en localStorage para persistencia
-    guardarCestaLocalStorage() {
-      localStorage.setItem('carritoPago', JSON.stringify(this.items));
-    },
-    // Recupera la cesta desde localStorage
-    recuperarCestaLocalStorage() {
-      const carrito = localStorage.getItem('carritoPago');
-      if (carrito) {
-        try {
-          this.items = JSON.parse(carrito);
-          return true;
-        } catch (error) {
-          console.error('Error recuperando carrito:', error);
-          return false;
-        }
-      }
-      return false;
-    },
-  },
+    { deep: true },
+  );
+
+  return {
+    items,
+    compraCompleta,
+    totalItems,
+    totalPrecio,
+    addProducto,
+    removeProducto,
+    incrementarCantidad,
+    decrementarCantidad,
+    clearCesta,
+    completarCompra,
+  };
 });

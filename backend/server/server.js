@@ -12,7 +12,7 @@ import Stripe from "stripe";
 import authRoutes from "./authRoutes.js";
 import articulosRoutes from "./articulosRoutes.js";
 import contactoRoutes from "./contactoRoutes.js";
-
+import facturasRoutes from "./facturasRoutes.js";
 // -----------------------------
 // CONFIGURACIÓN BÁSICA
 // -----------------------------
@@ -41,6 +41,7 @@ app.use(
 
 app.use(express.json());
 
+app.use("/api/facturas", facturasRoutes);
 // Servir uploads como estáticos
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
