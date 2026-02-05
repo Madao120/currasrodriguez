@@ -49,13 +49,19 @@
           <tr class="fw-bold">
             <td colspan="3" class="text-end">Total</td>
             <td>{{ cesta.totalPrecio }} €</td>
-            <td>
+            <td class="d-flex justify-center align-center flex-row">
               <button
+                :disabled="!isLogueado"
                 class="btn btn-success btn-sm justify-content-end px-3"
                 @click="iniciarPago"
               >
                 Pago
               </button>
+            </td>
+          </tr>
+          <tr v-if="!isLogueado">
+            <td colspan="5" class="text-end text-danger fw-bold">
+              Debes de iniciar la sesión para proceder al pago
             </td>
           </tr>
         </tfoot>
@@ -71,6 +77,7 @@ import Swal from "sweetalert2";
 // import isLogueado from "./NavBar.vue";
 
 const cesta = useCestaStore();
+const isLogueado = sessionStorage.getItem("token") !== null;
 
 const incrementar = (id) => cesta.incrementarCantidad(id);
 const decrementar = (id) => cesta.decrementarCantidad(id);

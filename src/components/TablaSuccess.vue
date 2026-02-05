@@ -11,10 +11,16 @@
         </p>
         <div class="invoice-container mt-4">
           <p class="text-muted">Descargue su factura en formato PDF:</p>
-          <button @click="generarFacturaPdf" class="btn btn-primary mb-2">
+          <button
+            @click="generarFacturaPdf"
+            class="btn btn-primary mb-2 justify-content-center"
+          >
             <i class="bi bi-file-earmark-pdf"></i> Descargar Factura
           </button>
-          <router-link to="/" class="btn btn-outline-primary">
+          <router-link
+            to="/"
+            class="btn btn-outline-primary justify-content-center"
+          >
             <i class="bi bi-arrow-left"></i> Volver a la tienda
           </router-link>
         </div>

@@ -143,6 +143,7 @@
 import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { esAdmin } from "@/api/authApi.js";
+import Swal from "sweetalert2";
 
 import { useCestaStore } from "@/store/cesta.js";
 const cestaStore = useCestaStore();
@@ -152,6 +153,15 @@ const query = ref(""); // IMPORTANTE: esto evita el warning
 
 // Función que se llama al hacer submit en el buscador
 function buscar() {
+  if (!isAdmin.value) {
+    Swal.fire({
+      icon: "warning",
+      title: "Acceso restringido",
+      text: "Solo los administradores pueden usar el buscador",
+      confirmButtonColor: "#0d6efd",
+    });
+    return;
+  }
   if (!query.value.trim()) return;
   router.push({
     name: "BusCar",

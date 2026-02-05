@@ -444,9 +444,9 @@
       "direccion": "Soy User",
       "provincia": "Melilla",
       "municipio": "Melilla",
-      "fecha_alta": "2025-12-12",
+      "fecha_alta": "2009-03-12",
       "historico": true,
-      "password": "$2b$10$VlNA0vPYSl4MXHIVRPxmI.LqqPGoaokZT4Lqa4d71TWAh1BUxFzS2",
+      "password": "$2b$10$6UJTz5jvuzhjfKSDmFbMWOtfqKXciUckykr.toeADLBSjmv8ZnWUu",
       "tipo_cliente": "particular",
       "lopd": true,
       "tipo": "user"
