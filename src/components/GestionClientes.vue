@@ -498,20 +498,30 @@ const clientesPaginados = computed(() => {
   return clientes.value.slice(start, end);
 });
 
-const cargarClientes = () => {
-  getClientes(mostrarHistorico.value).then((data) => {
-    clientes.value = data;
-    numclientes.value = data.length; //Actualiza el numero total de clientes
-    currentPage.value = 1; // Reiniciar a la primera págiona al cargar
-  });
-  Swal.fire({
-    icon: "success",
-    title: "Listando Clientes...",
-    showConfirmButton: false,
-    timer: 1500,
-  });
-};
+const cargarClientes = async () => {
+  try {
+    cargando.value = true;
+    getClientes(mostrarHistorico.value).then((data) => {
+      clientes.value = data;
 
+      data.sort((a, b) =>
+        a.apellidos.localeCompare(b.apellidos, "es", { sensitivity: "base" }),
+      );
+      numclientes.value = data.length; //Actualiza el numero total de clientes
+      currentPage.value = 1; // Reiniciar a la primera págiona al cargar
+    });
+    Swal.fire({
+      icon: "success",
+      title: "Listando Clientes...",
+      showConfirmButton: false,
+      timer: 1500,
+    });
+  } catch (error) {
+    console.error("error carga clientes", error);
+  } finally {
+    cargando.value = false;
+  }
+};
 /////// GUARDAR CLIENTE COMPLETO
 const guardarCliente = async () => {
   // Validación de contraseñas: solo validar si NO estamos editando O si se ingresó una nueva contraseña
