@@ -34,11 +34,13 @@ import autoTable from "jspdf-autotable";
 import { useCestaStore } from "../store/cesta";
 import logo from "../assets/logoPng.png";
 import { addFactura } from "../api/facturas";
+import { updateArticulo } from "../api/articulos";
 import { onMounted, ref } from "vue";
 // Creamos la cesta para usar metodos y datos
 const cestaStore = useCestaStore();
 cestaStore.completarCompra();
 const facturaGuardada = ref(false);
+const articulosActualizados = ref(false);
 
 async function guardarFacturaMongo() {
   if (facturaGuardada.value || cestaStore.compraCompleta.length === 0) return;
@@ -64,7 +66,27 @@ async function guardarFacturaMongo() {
 
 onMounted(async () => {
   await guardarFacturaMongo();
+  await marcarArticulosVendidos();
 });
+
+async function marcarArticulosVendidos() {
+  if (articulosActualizados.value || cestaStore.compraCompleta.length === 0) {
+    return;
+  }
+
+  try {
+    const actualizaciones = cestaStore.compraCompleta.map((producto) => {
+      const id = producto._id || producto.id;
+      if (!id) return null;
+      return updateArticulo(id, { estado: "vendido" });
+    });
+
+    await Promise.all(actualizaciones.filter(Boolean));
+    articulosActualizados.value = true;
+  } catch (error) {
+    console.error("Error actualizando estado de articulos:", error);
+  }
+}
 
 //Metodo que genera un pdf en base a los datos que le pasamos.
 async function generarFacturaPdf() {

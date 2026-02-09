@@ -27,9 +27,19 @@
                         <span class="badge bg-primary">{{ car.estado }}</span>
                         <button 
                             class="btn badge btn-sm btn-success ms-2"
+                            :disabled="car.estado !== 'disponible'"
                             @click.stop="agregarACesta(car)">
-                            <i class="bi bi-cart3 me-1"></i> Añadir Cesta
+                            <i class="bi bi-cart3 me-1"></i>
+                            {{ car.estado === 'disponible' ? 'Añadir Cesta' : 'No disponible' }}
                             </button>
+                        <!--Qate boton es el de reservar, chatgpteada-->
+                        <button
+                            class="btn badge btn-sm btn-warning ms-2"
+                            :disabled="car.estado !== 'disponible'"
+                            @click.stop="irAReserva(car)"
+                        >
+                            <i class="bi bi-bookmark-check me-1"></i> Reservar
+                        </button>
                     </div>
                 </div>
             </div>
@@ -41,8 +51,11 @@
 import { ref, onMounted } from "vue";
 import { getArticulos } from "@/api/articulos.js";
 import { useCestaStore } from "@/store/cesta.js";
-
+// Importamos router para
+import { useRouter } from "vue-router";
+const router = useRouter();
 const cestaStore = useCestaStore();
+
 
 const vehiculos = ref([]);
 
@@ -63,12 +76,18 @@ const urlImagen = (ruta) => {
 //Añadir vehículo a la cesta de la compra el id, marca, modelo, precio e imagen
 
 const agregarACesta = (vehiculo) => {
+    if (vehiculo.estado !== "disponible") return; //si no esta disponible no se hara la compra
     cestaStore.addProducto({
         id: vehiculo._id,
         nombre: `${vehiculo.marca} ${vehiculo.modelo}`,
         precio: vehiculo.precio,
         imagen: urlImagen(vehiculo.imagen),
     });
+};
+//Reserva de vehiculo
+const irAReserva = (vehiculo) => {
+    if (vehiculo.estado !== "disponible") return;
+    router.push({ name: "ReservaVehiculo", params: { id: vehiculo._id } });
 };
 
 </script>
