@@ -27,10 +27,12 @@
                         <span class="badge bg-primary">{{ car.estado }}</span>
                         <button 
                             class="btn badge btn-sm btn-success ms-2"
+                            :class="car.estado === 'disponible' ? 'btn-success' : 'btn-danger'"
                             :disabled="car.estado !== 'disponible'"
                             @click.stop="agregarACesta(car)">
                             <i class="bi bi-cart3 me-1"></i>
                             {{ car.estado === 'disponible' ? 'Añadir Cesta' : 'No disponible' }}
+                            
                             </button>
                         <!--Qate boton es el de reservar, chatgpteada-->
                         <button
@@ -39,6 +41,14 @@
                             @click.stop="irAReserva(car)"
                         >
                             <i class="bi bi-bookmark-check me-1"></i> Reservar
+                        </button>
+
+                        <!--Boton de vista-->
+                        <button
+                            class="btn badge btn-sm bg-primary ms-2"
+                            @click.stop="irAVista(car)"
+                        >
+                            <i class="bi bi-bookmark-check me-1"></i> Ver detalles del Vehículo
                         </button>
                     </div>
                 </div>
@@ -55,7 +65,6 @@ import { useCestaStore } from "@/store/cesta.js";
 import { useRouter } from "vue-router";
 const router = useRouter();
 const cestaStore = useCestaStore();
-
 
 const vehiculos = ref([]);
 
@@ -89,6 +98,11 @@ const irAReserva = (vehiculo) => {
     if (vehiculo.estado !== "disponible") return;
     router.push({ name: "ReservaVehiculo", params: { id: vehiculo._id } });
 };
+
+//Vista de Coche
+const irAVista = (vehiculo) => {
+    router.push({ name: "VistaCoche", params: { id: vehiculo._id } })
+}
 
 </script>
 

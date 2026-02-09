@@ -47,6 +47,21 @@
       </form>
     </div>
   </div>
+  <div
+    class="container-alerta d-flex flex-column justify-content-start align-items-start vh-75 mt-5 p-4 shadow-sm rounded border-radius-15"
+  >
+    <h2 class="">Cuentas Para Corregir</h2>
+    <div class="">
+      <h3>Admin</h3>
+      <p>DNI: 55555555K</p>
+      <p>Contraseña: abc123</p>
+    </div>
+    <div>
+      <h3>User</h3>
+      <p>DNI: 12345678Z</p>
+      <p>Contraseña: abc123</p>
+    </div>
+  </div>
 </template>
 
 <script>
@@ -92,11 +107,11 @@ export default {
         sessionStorage.setItem("isLogueado", "true");
         sessionStorage.setItem(
           "isAdmin",
-          decoded.tipo === "admin" ? "true" : "false"
+          decoded.tipo === "admin" ? "true" : "false",
         );
         sessionStorage.setItem(
           "isUser",
-          decoded.tipo !== "admin" ? "true" : "false"
+          decoded.tipo !== "admin" ? "true" : "false",
         );
         sessionStorage.setItem("userName", data.nombre);
         sessionStorage.setItem("userDNI", this.dni);
@@ -134,5 +149,21 @@ export default {
 .form-label {
   background-color: transparent !important;
   margin-bottom: 0.5rem;
+}
+
+.container-alerta {
+  border: 10px solid transparent;
+  border-radius: 15px;
+
+  border-image: repeating-linear-gradient(
+      45deg,
+      #ffd700,
+      #ffd700 20px,
+      #000000 20px,
+      #000000 40px
+    )
+    10;
+
+  width: 30%;
 }
 </style>
