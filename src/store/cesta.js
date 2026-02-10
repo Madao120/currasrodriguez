@@ -88,7 +88,15 @@ export const useCestaStore = defineStore("cesta", () => {
       console.error("Error parsing cart:", e);
     }
   }
-
+  // Hacer un cupon en caso de acertar el código "DESCUENTO"
+  /*
+  function aplicarCupon(codigo) {
+    if (codigo === "DESCUENTO") {
+      return totalPrecio.value * 0.9; // Aplica un 10% de descuento
+    }
+    return totalPrecio.value; // Sin descuento
+  }
+  */
   // Cada vez que un item nuevo entre en items, se cambiara el sessionSotrage para que entre este mismo, newItems es una referencia al array real
   watch(
     items,

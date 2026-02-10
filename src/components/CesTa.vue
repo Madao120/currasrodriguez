@@ -44,11 +44,21 @@
               </button>
             </td>
           </tr>
+          <tr>
+            <td>
+              <input
+                type="text"
+                class="form-control form-control-sm"
+                placeholder="Código de descuento"
+                v-model="codigoDescuento"
+              />
+            </td>
+          </tr>
         </tbody>
         <tfoot>
           <tr class="fw-bold">
             <td colspan="3" class="text-end">Total</td>
-            <td>{{ cesta.totalPrecio }} €</td>
+            <td>{{ precioFinal }} €</td>
             <td class="d-flex justify-center align-center flex-row">
               <button
                 :disabled="!isLogueado"
@@ -71,6 +81,7 @@
 </template>
 
 <script setup>
+import { ref, computed } from "vue";
 import { useCestaStore } from "@/store/cesta.js";
 import axios from "axios";
 import Swal from "sweetalert2";
@@ -78,6 +89,26 @@ import Swal from "sweetalert2";
 
 const cesta = useCestaStore();
 const isLogueado = sessionStorage.getItem("token") !== null;
+
+// Código de descuento
+const codigoDescuento = ref("");
+
+// Precio final calculado reactivamente
+const precioFinal = computed(() => {
+  let total = cesta.totalPrecio;
+
+  // Aplicar descuento si el código es correcto
+  if (codigoDescuento.value === "DESCUENTO") {
+    total = total * 0.9; // 10% de descuento
+  }
+
+  // Agregar gastos de envío si el total es menor a 20000
+  if (cesta.totalPrecio < 20000) {
+    total = total + 1000;
+  }
+
+  return total;
+});
 
 const incrementar = (id) => cesta.incrementarCantidad(id);
 const decrementar = (id) => cesta.decrementarCantidad(id);
@@ -105,7 +136,7 @@ const iniciarPago = async () => {
       "http://localhost:5000/crear-checkout-session",
       {
         items: cesta.items,
-        amount: cesta.totalPrecio,
+        amount: precioFinal.value, // Enviar el precio final calculado al backend
       },
     );
 
