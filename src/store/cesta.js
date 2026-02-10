@@ -1,3 +1,4 @@
+import e from "cors";
 import { defineStore } from "pinia";
 import { ref, computed, watch } from "vue";
 
@@ -97,7 +98,27 @@ export const useCestaStore = defineStore("cesta", () => {
     return totalPrecio.value; // Sin descuento
   }
   */
+  let codigoDescuento = ref("");
+  let precioFinal = ref(0);
+
   // Cada vez que un item nuevo entre en items, se cambiara el sessionSotrage para que entre este mismo, newItems es una referencia al array real
+  watch([codigoDescuento, precioFinal], () => {
+    let precio = totalPrecio.value;
+
+    if (codigoDescuento.value === "DESCUENTO") {
+      precio = totalPrecio.value * 0.9; // Aplica un 10% de descuento
+    } 
+    else {
+      precio = totalPrecio.value; // Sin descuento
+    }
+
+    if(precio < 20000){
+      precio += 1000;
+    }
+
+    precioFinal.value = precio;
+  }, {immediate: true, deep: true});
+  
   watch(
     items,
     (newItems) => {
@@ -111,6 +132,8 @@ export const useCestaStore = defineStore("cesta", () => {
     compraCompleta,
     totalItems,
     totalPrecio,
+    precioFinal,
+    codigoDescuento,
     addProducto,
     removeProducto,
     incrementarCantidad,

@@ -44,6 +44,8 @@
               </button>
             </td>
           </tr>
+        </tbody>
+        <tfoot>
           <tr>
             <td>
               <input
@@ -54,8 +56,6 @@
               />
             </td>
           </tr>
-        </tbody>
-        <tfoot>
           <tr class="fw-bold">
             <td colspan="3" class="text-end">Total</td>
             <td>{{ precioFinal }} €</td>
@@ -91,24 +91,10 @@ const cesta = useCestaStore();
 const isLogueado = sessionStorage.getItem("token") !== null;
 
 // Código de descuento
-const codigoDescuento = ref("");
+const codigoDescuento = ref(cesta.codigoDescuento);
 
-// Precio final calculado reactivamente
-const precioFinal = computed(() => {
-  let total = cesta.totalPrecio;
-
-  // Aplicar descuento si el código es correcto
-  if (codigoDescuento.value === "DESCUENTO") {
-    total = total * 0.9; // 10% de descuento
-  }
-
-  // Agregar gastos de envío si el total es menor a 20000
-  if (cesta.totalPrecio < 20000) {
-    total = total + 1000;
-  }
-
-  return total;
-});
+// Precio final con descuento aplicado
+const precioFinal = ref(cesta.precioFinal);
 
 const incrementar = (id) => cesta.incrementarCantidad(id);
 const decrementar = (id) => cesta.decrementarCantidad(id);

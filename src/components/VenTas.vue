@@ -50,17 +50,28 @@
                         >
                             <i class="bi bi-bookmark-check me-1"></i> Ver detalles del Vehículo
                         </button>
+
+                        <button
+                            type="button"
+                            @click="imprimirPDF(car)"
+                            class="btn btn-secondary ms-2 px-4 py-2 btn-sm rounded-0 border shadow-none"
+                        >
+                            <i class="bi bi-printer"></i>Imprimir
+                        </button>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-
 </template>
+
 <script setup>
 import { ref, onMounted } from "vue";
+import { jsPDF } from "jspdf";
+import autoTable from "jspdf-autotable";
 import { getArticulos } from "@/api/articulos.js";
 import { useCestaStore } from "@/store/cesta.js";
+import logo from "../assets/logoPng.png";
 // Importamos router para
 import { useRouter } from "vue-router";
 const router = useRouter();
@@ -104,7 +115,47 @@ const irAVista = (vehiculo) => {
     router.push({ name: "VistaCoche", params: { id: vehiculo._id } })
 }
 
+//Imprimir coche PDF
+const imprimirPDF = (vehiculo) => {
+  const doc = new jsPDF();
+
+  doc.addImage(logo, "png", 10, 10, 20, 20);
+    doc.setFontSize(18);
+    doc.text("Ficha de Vehículo", 60, 20);
+
+  const headers = [
+    "Matrícula",
+    "Marca",
+    "Modelo",
+    "Estado",
+    "Combustible",
+    "Precio",
+  ];
+
+    autoTable(doc, {
+    startY: 30,
+    head: [headers],
+        body: [
+            [
+                vehiculo.matricula,
+                vehiculo.marca,
+                vehiculo.modelo,
+                vehiculo.estado,
+                vehiculo.combustible,
+                vehiculo.precio,
+            ],
+        ],
+    theme: "striped",
+    styles: { fontSize: 10 },
+  });
+
+    doc.save(`vehiculo_${vehiculo.matricula || vehiculo._id}.pdf`);
+};
+
 </script>
+
+
+
 
 <style scoped>
 .card-title{
