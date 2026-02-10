@@ -10,6 +10,9 @@ import ModeLos from "../../src/components/ModeLos.vue";
 import VenTas from "../../src/components/VenTas.vue";
 import TablaLogin from "../../src/components/TablaLogin.vue";
 import CesTa from "../../src/components/CesTa.vue";
+import TablaSuccess from "../../src/components/TablaSuccess.vue";
+import ReservaVehiculo from "../../src/components/ReservaVehiculo.vue";
+import VistaCoche from "../../src/components/VistaCoche.vue";
 
 import { createRouter, createWebHistory } from "vue-router";
 import ConTacto from "../../src/components/ConTacto.vue";
@@ -74,6 +77,21 @@ const routes = [
     path: "/cesta",
     name: "CesTa",
     component: CesTa,
+  },
+  {
+    path: "/success",
+    name: "TablaSuccess",
+    component: TablaSuccess,
+  },
+  {
+    path: "/reservar/:id",
+    name: "ReservaVehiculo",
+    component: ReservaVehiculo,
+  },
+  {
+    path: "/ver/:id",
+    name: "VistaCoche",
+    component: VistaCoche,
   },
   {
     path: "/:pathMatch(.*)*",

@@ -1,130 +1,184 @@
 <template>
-  <div class="success-container">
-    <div class="success-card">
-      <h1 class="title">Pago Completado!</h1>
-      <p class="message">
-        Gracias por tu compra. Te hemos enviado un correo con los detalles.
-      </p>
-      <div class="invoice-container">
-        <p>Descargue su factura en formato PDF:</p>
-        <button @click="generarFacturaPDF" class="btn btn-primary">
-          <i class="bi bi-file-earmark-pdf"></i> Descargar Factura
-        </button>
-        <router-link to="/tienda" class="back-link">
-          <i class="bi bi-arrow-left"></i> Volver a la tienda
-        </router-link>
+  <div
+    class="success-container d-flex justify-content-center align-items-center"
+  >
+    <div class="success-card card shadow">
+      <div class="card-body">
+        <h1 class="card-title text-success">Pago Completado!</h1>
+        <p class="card-text text-muted">
+          Muchas gracias por tu compra. Te hemos enviado un correo con los
+          detalles.
+        </p>
+        <div class="invoice-container mt-4">
+          <p class="text-muted">Descargue su factura en formato PDF:</p>
+          <button
+            @click="generarFacturaPdf"
+            class="btn btn-primary mb-2 justify-content-center"
+          >
+            <i class="bi bi-file-earmark-pdf"></i> Descargar Factura
+          </button>
+          <router-link
+            to="/"
+            class="btn btn-outline-primary justify-content-center"
+          >
+            <i class="bi bi-arrow-left"></i> Volver a la tienda
+          </router-link>
+        </div>
       </div>
     </div>
   </div>
 </template>
-<script>
+<script setup>
 import jsPDF from "jspdf";
-import "Jspdf-autotable";
-import { useCartStore } from "/store/carts.js";
-import { watch, toRefs } from "vue";
-import logo from "/assets/logo.png"; // Importa la imagen del logo
-export default {
-  data() {
-    return {
-      cartitems: [],
-      totalPrice: 0,
-      //otros datos como el cliente, dirección, email, etc.
+import autoTable from "jspdf-autotable";
+import { useCestaStore } from "../store/cesta";
+import logo from "../assets/logoPng.png";
+import { addFactura } from "../api/facturas";
+import { updateArticulo } from "../api/articulos";
+import { onMounted, ref } from "vue";
+// Creamos la cesta para usar metodos y datos
+const cestaStore = useCestaStore();
+cestaStore.completarCompra();
+const facturaGuardada = ref(false);
+const articulosActualizados = ref(false);
+
+async function guardarFacturaMongo() {
+  if (facturaGuardada.value || cestaStore.compraCompleta.length === 0) return;
+
+  try {
+    const factura = {
+      productos: cestaStore.compraCompleta.map((producto) => ({
+        productoId: producto._id || producto.id,
+        nombre:
+          producto.nombre || `${producto.marca ?? ""} ${producto.modelo ?? ""}`,
+        cantidad: producto.cantidad,
+        precio_unitario: producto.precio,
+      })),
+      total: cestaStore.totalPrecio,
     };
-  },
+    await addFactura(factura);
+    facturaGuardada.value = true;
+    console.log("Factura guardada en MongoDB");
+  } catch (error) {
+    console.error("Error guardando la factura", error);
+  }
+}
 
-  mounted() {
-    const cartStore = useCartStore();
-    const { items } = toRefs(cartStore); // Obten los items del carrito desde el store de Pinia
-    // y tambien la variable totalPrice desde el getter del store
-    this.cartItems = items.value;
-    this.totalPrice = cartStore.totalPrice;
+onMounted(async () => {
+  await guardarFacturaMongo();
+  await marcarArticulosVendidos();
+});
 
-    // Usar un watch para actualizar cartitems cuando cambian
-    watch(
-      () => cartStore.items,
-      (newVal) => {
-        this.cartitems = newVal;
-      },
-      { deep: true }
-    );
-  },
+async function marcarArticulosVendidos() {
+  if (articulosActualizados.value || cestaStore.compraCompleta.length === 0) {
+    return;
+  }
 
-  methods: {
-    generarFacturaPDF() {
-      if (this.cartItems.length == 0) {
-        console.error(
-          "No hay productos en el carrito. No se puede generar la factura."
-        );
-        return;
-      }
+  try {
+    const actualizaciones = cestaStore.compraCompleta.map((producto) => {
+      const id = producto._id || producto.id;
+      if (!id) return null;
+      return updateArticulo(id, { estado: "vendido" });
+    });
 
-      const doc = new jsPDF();
-      const cart = this.cartItems;
+    await Promise.all(actualizaciones.filter(Boolean));
+    articulosActualizados.value = true;
+  } catch (error) {
+    console.error("Error actualizando estado de articulos:", error);
+  }
+}
 
-      // Logo en la parte superior izquierda (ajustar la ruta de tu logo)
-      doc.addImage(logo, "png", 10, 10, 20, 20); // Ajusta las coordenadas y tamaño
+//Metodo que genera un pdf en base a los datos que le pasamos.
+async function generarFacturaPdf() {
+  //Asociamos el array de items no visible a la variable cart
+  const cart = cestaStore.compraCompleta;
 
-      // Titulo de la factura
-      doc.setFontSize(18);
-      doc.text("Factura de Compra", 60, 20); // Alineado a la derecha del logo
+  //Si no tiene elementos mostramos alert
+  if (cart.length === 0) {
+    alert("No hay productos para facturar");
+    return;
+  }
 
-      // Información del cliente
-      doc.setFontSize(9);
-      doc.text("Razón Social: Regalos Teis", 110, 50);
-      doc.text("Dirección: Avenida Galicia 101, Vigo - 36216", 110, 55);
-      doc.text("Tlfo: 986 666 333 Email: regalos@example.com", 110, 60);
+  //Creamos pdf y seteamos las propiedades
+  const doc = new jsPDF();
 
-      // Crear la tabla con los productos del carrito
-      const headers = [
-        ["ID", "Producto", "Cantidad", "Precio Unitario", "Total"],
-      ];
-      const data = cart.map((item) => [
-        item.id,
-        item.nombre,
-        item.cantidad,
-        `${item.precio_unitario.toFixed(2)} €`, // Formatear precio unitario
-        `${(item.cantidad * item.precio_unitario).toFixed(2)} €`, // Formatear total
-      ]);
+  // Logo y encabezado
+  doc.addImage(logo, "png", 10, 10, 20, 20);
+  doc.setFontSize(18);
+  doc.text("Factura de Compra", 60, 20);
+  doc.setFontSize(9);
+  doc.text("Razón Social: Regalos Teis", 110, 50);
+  doc.text("Dirección: Avenida Galicia 101, Vigo - 36216", 110, 55);
+  doc.text("Tlfo: 986 666 333 - Email: regalos@example.com", 110, 60);
 
-      doc.autoTable({
-        startY: 80,
-        head: headers,
-        body: data,
-        columnStyles: {
-          0: { halign: "center" }, // Alinear ID al centro
-          2: { halign: "center" }, // Alinear Cantidad al centro
-          3: { halign: "right" }, // Alinear Precio Unitario a la derecha
-          4: { halign: "right" }, // Alinear Total a la derecha
-        },
-        theme: "striped", // Estilo de la tabla con líneas de fondo alternadas
-      });
+  // Tabla de productos, marcará los headers de cada tabla
+  const headers = [["ID", "Producto", "Cantidad", "Precio Unitario", "Total"]];
+  //Formatea los datos para ser visibles, es un array de objetos
+  const data = cart.map((item) => [
+    item.id,
+    item.nombre,
+    item.cantidad,
+    `${item.precio.toFixed(2)}€`,
+    `${(item.cantidad * item.precio).toFixed(2)}€`,
+  ]);
 
-      // Total de la compra (alineado a la derecha)
-      const totalText = `Total: ${this.cartItems
-        .reduce((acc, item) => acc + item.precio_unitario * item.cantidad, 0)
-        .toFixed(2)} €`;
-
-      // Obtener el ancho de la página
-      const pageWidth = doc.internal.pageSize.width;
-
-      // Calcular la posición X para alinear a la derecha
-      const totalWidth = doc.getTextWidth(totalText);
-      const positionX = pageWidth - totalWidth - 14; // Resta 14 para margen desde el borde derecho
-      doc.setFont("helvetica", "bold");
-      doc.setFontSize(12);
-      // Colocar el texto en la posición calculada
-      doc.text(totalText, positionX, doc.lastAutoTable.finalY + 10);
-
-      // Guardar el archivo PDF
-      doc.save("factura.pdf");
+  //Creamos tabla en base a los headers y datos
+  autoTable(doc, {
+    startY: 80,
+    head: headers,
+    body: data,
+    columnStyles: {
+      0: { halign: "center" },
+      2: { halign: "center" },
+      3: { halign: "right" },
+      4: { halign: "right" },
     },
-  },
+    theme: "striped",
+  });
 
-  beforeUnmount() {
-    // Eliminar los datos del carrito después de mostrar la factura
-    const cartStore = useCartStore();
-    cartStore.limpiarCart();
-  },
-};
+  // Coger los datos para poner en el documento, el total vendrá del compraCompleta ya que el otro estará vacío
+  const totalPrice = cestaStore.totalPrecio;
+  const totalText = `Total: ${totalPrice.toFixed(2)}€`;
+  const pageWidth = doc.internal.pageSize.width;
+  const totalWidth = doc.getTextWidth(totalText);
+  const positionX = pageWidth - totalWidth - 14;
+
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(12);
+  doc.text(totalText, positionX - 9, doc.lastAutoTable.finalY + 10);
+
+  //Guardamos el pdf
+  doc.save("factura.pdf");
+
+  //Limpuamos ambas listas y el sessionStorage
+  cestaStore.clearCesta();
+}
 </script>
-<style scoped></style>
+<style scoped>
+.success-container {
+  min-height: 80vh;
+  padding: 20px;
+}
+
+.success-card {
+  max-width: 500px;
+  border-radius: 8px;
+}
+
+.invoice-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+}
+
+router-link {
+  text-decoration: none;
+}
+</style>

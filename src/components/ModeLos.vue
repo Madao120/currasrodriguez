@@ -406,6 +406,7 @@ import Swal from "sweetalert2";
 import { ref, computed, watch, onMounted } from "vue";
 import { addArticulo, getArticulos } from "@/api/articulos.js";
 import provmuniData from "../../backend/data/provmuni.json";
+import logo from "../assets/logoPng.png";
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
 
@@ -567,8 +568,9 @@ const guardarVehiculo = async () => {
 const imprimirPDF = () => {
   const doc = new jsPDF();
 
+  doc.addImage(logo, "png", 10, 10, 20, 20);
   doc.setFontSize(18);
-  doc.text("Listado de Vehículos", 14, 20);
+  doc.text("Listado de Vehículos", 60, 20);
 
   const headers = [
     "Matrícula",

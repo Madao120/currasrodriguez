@@ -8,17 +8,17 @@ const API_URL = "http://localhost:3000/clientes";
 //Función para obtener la lista de clientes desde la API
 
 export const getClientes = (mostrarHistorico) => {
-  let url = `${API_URL}?_sort=apellidos&_order=asc`;
+  let url = `${API_URL}`;
 
   if (!mostrarHistorico) {
     // Solo clientes con histórico = true
-    url += `&historico=true`;
-  } else {
-    // Todos los clientes, sin filtrar por histórico
-    url += ``;
-  }
+    url += `?historico=true`;
+  } //else {
+  // Todos los clientes, sin filtrar por histórico
+  //  url += ``;
+  //}
 
-  return axios.get(url).then((res) => res.data);
+  return axios.get(url).then(res => res.data);
 };
 
 // Función para agregar cliente nuevo

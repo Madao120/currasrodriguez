@@ -93,5 +93,50 @@ router.post("/", upload.single("imagen"), async (req, res) => {
   }
 });
 
-// otras rutas PUT, DELETE, GET /:id igual
+// Obtener artículo por ID
+router.get("/:id", async (req, res) => {
+  try {
+    const articulo = await Articulo.findById(req.params.id);
+    if (!articulo) {
+      return res.status(404).json({ error: "Articulo no encontrado" });
+    }
+    res.json(articulo);
+  } catch (err) {
+    console.error("Error obteniendo articulo:", err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Actualizar artículo (por ejemplo, estado vendido)
+router.put("/:id", async (req, res) => {
+  try {
+    const actualizado = await Articulo.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      { new: true, runValidators: true },
+    );
+    if (!actualizado) {
+      return res.status(404).json({ error: "Articulo no encontrado" });
+    }
+    res.json(actualizado);
+  } catch (err) {
+    console.error("Error actualizando articulo:", err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Eliminar artículo
+router.delete("/:id", async (req, res) => {
+  try {
+    const eliminado = await Articulo.findByIdAndDelete(req.params.id);
+    if (!eliminado) {
+      return res.status(404).json({ error: "Articulo no encontrado" });
+    }
+    res.json({ message: "Articulo eliminado", eliminado });
+  } catch (err) {
+    console.error("Error eliminando articulo:", err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 export default router;

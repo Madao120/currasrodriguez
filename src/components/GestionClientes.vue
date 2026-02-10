@@ -459,8 +459,15 @@ const isAdmin = ref(false);
 // Zona Cargar clientes Al Montar el componente
 onMounted(async () => {
   isAdmin.value = sessionStorage.getItem("isAdmin") === "true";
-  cargarClientes();
-  currentPage.value = 1; // Iniciar en la primera página
+
+  // Solo cargar clientes si es admin
+  if (isAdmin.value) {
+    clientes.value = await getClientes();
+    cargarClientes();
+    currentPage.value = 1; // Iniciar en la primera página
+  }
+
+  // Si el usuario está logueado (no importa si es admin), buscar su cliente
   if (isLogueado) {
     buscarClientePorDNI(sessionStorage.getItem("userDNI"));
   }
@@ -491,57 +498,38 @@ const clientesPaginados = computed(() => {
   return clientes.value.slice(start, end);
 });
 
-const cargarClientes = () => {
-  getClientes(mostrarHistorico.value).then((data) => {
-    clientes.value = data;
-    numclientes.value = data.length; //Actualiza el numero total de clientes
-    currentPage.value = 1; // Reiniciar a la primera págiona al cargar
-  });
-  Swal.fire({
-    icon: "success",
-    title: "Listando Clientes...",
-    showConfirmButton: false,
-    timer: 1500,
-  });
-};
+const cargarClientes = async () => {
+  try {
+    cargando.value = true;
+    getClientes(mostrarHistorico.value).then((data) => {
+      clientes.value = data;
 
+      data.sort((a, b) =>
+        a.apellidos.localeCompare(b.apellidos, "es", { sensitivity: "base" }),
+      );
+      numclientes.value = data.length; //Actualiza el numero total de clientes
+      currentPage.value = 1; // Reiniciar a la primera págiona al cargar
+    });
+    Swal.fire({
+      icon: "success",
+      title: "Listando Clientes...",
+      showConfirmButton: false,
+      timer: 1500,
+    });
+  } catch (error) {
+    console.error("error carga clientes", error);
+  } finally {
+    cargando.value = false;
+  }
+};
 /////// GUARDAR CLIENTE COMPLETO
 const guardarCliente = async () => {
-  // Validación de contraseñas: si no coinciden, mostrar error y cancelar
-  if (
-    nuevoCliente.value.password !== nuevoCliente.value.password2 &&
-    editando.value === false
-  ) {
-    Swal.fire({
-      icon: "error",
-      title: "La contraseña no es la misma",
-      showConfirmButton: false,
-      timer: 2000,
-    });
-    return;
-  }
-  if (nuevoCliente.value.fecha_alta.includes("/")) {
-    nuevoCliente.value.fecha_alta = formatearFechaParaInput(
-      nuevoCliente.value.fecha_alta,
-    );
-  }
-
-  // Hash de la contraseña antes de guardar
-  const salt = bcrypt.genSaltSync(10);
-  const hash = bcrypt.hashSync(nuevoCliente.value.password, salt);
-
-  // Validar duplicados solo si estás creando (no si editando)
-  if (!editando.value) {
-    const duplicado = clientes.value.find(
-      (cliente) =>
-        cliente.dni === nuevoCliente.value.dni ||
-        cliente.movil === nuevoCliente.value.movil ||
-        cliente.email === nuevoCliente.value.email,
-    );
-    if (duplicado) {
+  // Validación de contraseñas: solo validar si NO estamos editando O si se ingresó una nueva contraseña
+  if (!editando.value || nuevoCliente.value.password !== "") {
+    if (nuevoCliente.value.password !== nuevoCliente.value.password2) {
       Swal.fire({
         icon: "error",
-        title: "DNI, móvil o email duplicados",
+        title: "La contraseña no es la misma",
         showConfirmButton: false,
         timer: 2000,
       });
@@ -549,7 +537,22 @@ const guardarCliente = async () => {
     }
   }
 
-  nuevoCliente.value.password = hash;
+  if (nuevoCliente.value.fecha_alta.includes("/")) {
+    nuevoCliente.value.fecha_alta = formatearFechaParaInput(
+      nuevoCliente.value.fecha_alta,
+    );
+  }
+
+  // Solo hashear si hay contraseña nueva
+  if (nuevoCliente.value.password && nuevoCliente.value.password !== "") {
+    const salt = bcrypt.genSaltSync(10);
+    const hash = bcrypt.hashSync(nuevoCliente.value.password, salt);
+    nuevoCliente.value.password = hash;
+  } else if (editando.value) {
+    // Si estamos editando y no hay contraseña nueva, eliminar el campo
+    delete nuevoCliente.value.password;
+  }
+
   delete nuevoCliente.value.password2; // Eliminar password2 antes de guardar
 
   // Confirmación antes de guardar
@@ -606,9 +609,8 @@ const guardarCliente = async () => {
       provincia: "",
       municipio: "",
       fecha_alta: "",
-      tipo_cliente: "",
       historico: true,
-      lopd: false,
+      password: "",
     };
 
     editando.value = false;
@@ -711,7 +713,15 @@ const editarCliente = (movil) => {
   if (fechaFormateada && fechaFormateada.includes("/")) {
     fechaFormateada = formatearFechaParaInput(fechaFormateada);
   }
-  nuevoCliente.value = { ...cliente, fecha_alta: fechaFormateada };
+
+  // Cargar cliente pero sin la contraseña
+  nuevoCliente.value = {
+    ...cliente,
+    fecha_alta: fechaFormateada,
+    password: "", // Dejar vacío para que el admin pueda cambiarla
+    password2: "", // También vacío
+  };
+
   editando.value = true;
   filtrarMunicipios();
   clienteEditandoId.value = cliente.id;
@@ -789,16 +799,25 @@ const buscarClientePorDNI = async (dni) => {
       return;
     }
 
-    // ✅ Cargar los datos en el formulario
-    nuevoCliente.value = { ...cliente };
-    nuevoCliente.value.fecha_alta = formatearFechaParaInput(cliente.fecha_alta);
+    // ✅ Formatear la fecha correctamente
+    let fechaFormateada = cliente.fecha_alta;
+    if (fechaFormateada && fechaFormateada.includes("/")) {
+      fechaFormateada = formatearFechaParaInput(fechaFormateada);
+    }
+
+    // ✅ Cargar los datos en el formulario sin la contraseña
+    nuevoCliente.value = {
+      ...cliente,
+      fecha_alta: fechaFormateada,
+      password: "",
+      password2: "",
+    };
+
     editando.value = true;
 
     // Actualiza lista de municipios si cambia la provincia
     filtrarMunicipios();
-    //opcional
     clienteEditandoId.value = cliente.id;
-    nuevoCliente.value.municipio = cliente.municipio;
 
     Swal.fire({
       icon: "success",

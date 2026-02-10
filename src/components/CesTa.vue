@@ -44,18 +44,34 @@
               </button>
             </td>
           </tr>
+          <tr>
+            <td>
+              <input
+                type="text"
+                class="form-control form-control-sm"
+                placeholder="Código de descuento"
+                v-model="codigoDescuento"
+              />
+            </td>
+          </tr>
         </tbody>
         <tfoot>
           <tr class="fw-bold">
             <td colspan="3" class="text-end">Total</td>
-            <td>{{ cesta.totalPrecio }} €</td>
-            <td>
+            <td>{{ precioFinal }} €</td>
+            <td class="d-flex justify-center align-center flex-row">
               <button
+                :disabled="!isLogueado"
                 class="btn btn-success btn-sm justify-content-end px-3"
                 @click="iniciarPago"
               >
                 Pago
               </button>
+            </td>
+          </tr>
+          <tr v-if="!isLogueado">
+            <td colspan="5" class="text-end text-danger fw-bold">
+              Debes de iniciar la sesión para proceder al pago
             </td>
           </tr>
         </tfoot>
@@ -65,27 +81,62 @@
 </template>
 
 <script setup>
+import { ref, computed } from "vue";
 import { useCestaStore } from "@/store/cesta.js";
+import axios from "axios";
+import Swal from "sweetalert2";
+// import isLogueado from "./NavBar.vue";
 
 const cesta = useCestaStore();
+const isLogueado = sessionStorage.getItem("token") !== null;
 
-const incrementar = (id) => cesta.incrementar(id);
-const decrementar = (id) => cesta.decrementar(id);
+// Código de descuento
+const codigoDescuento = ref("");
+
+// Precio final calculado reactivamente
+const precioFinal = computed(() => {
+  let total = cesta.totalPrecio;
+
+  // Aplicar descuento si el código es correcto
+  if (codigoDescuento.value === "DESCUENTO") {
+    total = total * 0.9; // 10% de descuento
+  }
+
+  // Agregar gastos de envío si el total es menor a 20000
+  if (cesta.totalPrecio < 20000) {
+    total = total + 1000;
+  }
+
+  return total;
+});
+
+const incrementar = (id) => cesta.incrementarCantidad(id);
+const decrementar = (id) => cesta.decrementarCantidad(id);
 const removeProducto = (id) => cesta.removeProducto(id);
 
 // Iniciar pago con Stripe usando axios
-const iniciarPago = () => {
+const iniciarPago = async () => {
   if (!cesta.items.length) {
-    mostrarAlerta("Aviso", "La cesta está vacia", "warning");
+    Swal.fire("Aviso", "La cesta está vacía", "warning");
     return;
   }
+  if (sessionStorage.getItem("token") === null) {
+    Swal.fire("Aviso", "Debes iniciar sesión para realizar el pago", "warning");
+    return;
+  }
+  /*if(!isLogueado){
+    Swal.fire("Aviso", "Debes iniciar sesión para realizar el pago", "warning");
+    return;
+  } */
   try {
+    console.log("Compra completada y guardada");
+
     // Crear la sesión de pago en el backend
     const response = await axios.post(
       "http://localhost:5000/crear-checkout-session",
       {
         items: cesta.items,
-        amount: cesta.totalPrecio,
+        amount: precioFinal.value, // Enviar el precio final calculado al backend
       },
     );
 
@@ -93,15 +144,14 @@ const iniciarPago = () => {
 
     if (!session.url) {
       console.error("X No se recibio URL de Stripe.");
-      mostrarAlerta("Error", "No se pudo iniciar el pago", "error");
+      Swal.fire("Error", "No se pudo iniciar el pago", "error");
       return;
     }
     // Redirigir directamente al checkout de Stripe
     window.location.href = session.url;
-
   } catch (error) {
     console.error("Error en iniciarPago:", error);
-    mostrarAlerta("Error", "No se pudo iniciar el pago", "error");
+    Swal.fire("Error", "No se pudo iniciar el pago", "error");
   }
 };
 </script>
