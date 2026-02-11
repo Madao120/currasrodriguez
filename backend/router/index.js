@@ -13,6 +13,9 @@ import CesTa from "../../src/components/CesTa.vue";
 import TablaSuccess from "../../src/components/TablaSuccess.vue";
 import ReservaVehiculo from "../../src/components/ReservaVehiculo.vue";
 import VistaCoche from "../../src/components/VistaCoche.vue";
+import CochesOrdenados from "../../src/components/CochesOrdenados.vue";
+import FormEmpleo from "../../src/components/FormEmpleo.vue";
+import FormEmpleoEnvio from "../../src/components/FormEmpleoEnvio.vue";
 
 import { createRouter, createWebHistory } from "vue-router";
 import ConTacto from "../../src/components/ConTacto.vue";
@@ -92,6 +95,21 @@ const routes = [
     path: "/ver/:id",
     name: "VistaCoche",
     component: VistaCoche,
+  },
+  {
+    path: "/ordenar-coches",
+    name: "CochesOrdenados",
+    component: CochesOrdenados,
+  },
+  {
+    path: "/form-empleo",
+    name: "FormEmpleo",
+    component: FormEmpleo,
+  },
+  {
+    path: "/form-empleo-envio",
+    name: "FormEmpleoEnvio",
+    component: FormEmpleoEnvio,
   },
   {
     path: "/:pathMatch(.*)*",

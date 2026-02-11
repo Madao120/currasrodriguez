@@ -53,6 +53,11 @@
             <li class="nav-item">
               <router-link to="/ventas" class="nav-link">Ventas</router-link>
             </li>
+            <li v-if="isLogueado">
+              <router-link to="/form-empleo" class="nav-link"
+                >Empleo</router-link
+              >
+            </li>
             <li class="nav-item">
               <router-link to="/contacto" class="nav-link"
                 >Contacto</router-link

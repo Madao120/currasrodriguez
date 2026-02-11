@@ -122,7 +122,7 @@ const iniciarPago = async () => {
       "http://localhost:5000/crear-checkout-session",
       {
         items: cesta.items,
-        amount: precioFinal.value, // Enviar el precio final calculado al backend
+        amount: cesta.precioFinal.value, // Enviar el precio final calculado al backend
       },
     );
 

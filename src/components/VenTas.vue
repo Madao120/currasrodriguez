@@ -61,6 +61,12 @@
                     </div>
                 </div>
             </div>
+            <div class="">
+                <button
+                    class="btn btn-outline-secondary mt-4"
+                    @click="router.push({ name: 'CochesOrdenados' })">
+                Ordenar Coches por Modelo</button>
+            </div>
         </div>
     </div>
 </template>
@@ -83,8 +89,6 @@ onMounted(async () => {
     vehiculos.value = await getArticulos();
     for (const element of vehiculos.value) {
         console.log(element.imagen);
-        
-        
     }
 });
 
@@ -153,10 +157,6 @@ const imprimirPDF = (vehiculo) => {
 };
 
 </script>
-
-
-
-
 <style scoped>
 .card-title{
     font-weight: bold;
