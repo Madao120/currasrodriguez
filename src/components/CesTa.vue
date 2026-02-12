@@ -46,19 +46,23 @@
           </tr>
         </tbody>
         <tfoot>
-          <tr>
+          <tr class="fw-bold">
             <td>
               <input
                 type="text"
                 class="form-control form-control-sm"
                 placeholder="Código de descuento"
-                v-model="codigoDescuento"
+                v-model="cesta.codigoDescuento"
               />
             </td>
-          </tr>
-          <tr class="fw-bold">
-            <td colspan="3" class="text-end">Total</td>
-            <td>{{ precioFinal }} €</td>
+            <td v-if="cesta.isGastosEnvio" class="text-danger">
+              Si el pedido supera los 20.000€, no se aplicarán los gastos de
+              envío
+            </td>
+            <td :colspan="cesta.isGastosEnvio ? 1 : 2" class="text-end">
+              Total
+            </td>
+            <td>{{ cesta.precioFinal }} €</td>
             <td class="d-flex justify-center align-center flex-row">
               <button
                 :disabled="!isLogueado"
@@ -90,12 +94,6 @@ import Swal from "sweetalert2";
 const cesta = useCestaStore();
 const isLogueado = sessionStorage.getItem("token") !== null;
 
-// Código de descuento
-const codigoDescuento = ref(cesta.codigoDescuento);
-
-// Precio final con descuento aplicado
-const precioFinal = ref(cesta.precioFinal);
-
 const incrementar = (id) => cesta.incrementarCantidad(id);
 const decrementar = (id) => cesta.decrementarCantidad(id);
 const removeProducto = (id) => cesta.removeProducto(id);
@@ -122,7 +120,7 @@ const iniciarPago = async () => {
       "http://localhost:5000/crear-checkout-session",
       {
         items: cesta.items,
-        amount: cesta.precioFinal.value, // Enviar el precio final calculado al backend
+        amount: cesta.precioFinal,
       },
     );
 

@@ -44,6 +44,8 @@ const facturaGuardada = ref(false);
 const articulosActualizados = ref(false);
 const cliente = ref(null);
 
+const cesta = useCestaStore();
+
 async function guardarFacturaMongo() {
   if (facturaGuardada.value || cestaStore.compraCompleta.length === 0) return;
 
@@ -156,7 +158,7 @@ async function generarFacturaPdf() {
 
   // Coger los datos para poner en el documento, el total vendrá del compraCompleta ya que el otro estará vacío
   const totalPrice = cestaStore.totalPrecio;
-  const totalText = `Total: ${totalPrice.toFixed(2)}€`;
+  const totalText = `Total: ${cesta.precioFinal}€`;
   const pageWidth = doc.internal.pageSize.width;
   const totalWidth = doc.getTextWidth(totalText);
   const positionX = pageWidth - totalWidth - 14;

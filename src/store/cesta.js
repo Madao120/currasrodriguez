@@ -99,26 +99,26 @@ export const useCestaStore = defineStore("cesta", () => {
   }
   */
   let codigoDescuento = ref("");
-  let precioFinal = ref(0);
-
-  // Cada vez que un item nuevo entre en items, se cambiara el sessionSotrage para que entre este mismo, newItems es una referencia al array real
-  watch([codigoDescuento, precioFinal], () => {
+  let isGastosEnvio = ref(false);
+  let precioFinal = computed(() => {
     let precio = totalPrecio.value;
 
     if (codigoDescuento.value === "DESCUENTO") {
       precio = totalPrecio.value * 0.9; // Aplica un 10% de descuento
-    } 
-    else {
+      isGastosEnvio.value = false; // Si el código es válido, no se aplican los gastos de envío
+    } else {
       precio = totalPrecio.value; // Sin descuento
+      isGastosEnvio.value = false; // Si el código no es válido, no se aplican los gastos de envío
     }
 
-    if(precio < 20000){
-      precio += 1000;
+    if (precio < 20000) {
+      isGastosEnvio.value = true;
+      precio += 2000;
     }
 
-    precioFinal.value = precio;
-  }, {immediate: true, deep: true});
-  
+    return precio;
+  });
+
   watch(
     items,
     (newItems) => {
@@ -134,6 +134,7 @@ export const useCestaStore = defineStore("cesta", () => {
     totalPrecio,
     precioFinal,
     codigoDescuento,
+    isGastosEnvio,
     addProducto,
     removeProducto,
     incrementarCantidad,

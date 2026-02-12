@@ -51,23 +51,33 @@ app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 app.post("/crear-checkout-session", async (req, res) => {
   try {
-    const { items } = req.body;
+    //modificacion
+    const { items, amount } = req.body;
     console.log("Items recibidos para checkout:", items);
+    console.log("Monto total recibido:", amount);
 
     if (!items || !items.length) {
       return res.status(400).json({ error: "No hay items en la cesta" });
     }
 
-    const lineItems = items.map((item) => ({
-      price_data: {
-        currency: "eur",
-        product_data: {
-          name: item.nombre,
+    //MODIFICACION
+    if (!amount || amount <= 0) {
+      return res.status(400).json({ error: "Monto inválido" });
+    }
+
+    // Crear un solo line_item con el precio total (ya incluye descuento y gastos de envío)
+    const lineItems = [
+      {
+        price_data: {
+          currency: "eur",
+          product_data: {
+            name: `Compra de ${items.length} artículo(s) - Total con descuento/gastos`,
+          },
+          unit_amount: Math.round(amount * 100), // céntimos - usar el amount calculado en frontend
         },
-        unit_amount: Math.round(item.precio * 100), // céntimos
+        quantity: 1,
       },
-      quantity: item.cantidad,
-    }));
+    ];
 
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
