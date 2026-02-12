@@ -354,6 +354,13 @@
               >
                 <i class="bi bi-printer"></i>Imprimir
               </button>
+              <button
+                type="button"
+                @click="imprimirPDFKm"
+                class="btn btn-secondary ms-2 px-4 py-2 btn-sm rounded-0 border shadow-none"
+              >
+                <i class="bi bi-printer"></i>Imprimir por km
+              </button>
             </div>
           </div>
         </div>
@@ -597,6 +604,42 @@ const imprimirPDF = () => {
   });
 
   doc.save("listado_vehiculos.pdf");
+};
+// Imprimir PDF solo con vehículos de menos de 10000 km
+const imprimirPDFKm = () => {
+  const doc = new jsPDF();
+
+  doc.addImage(logo, "png", 10, 10, 20, 20);
+  doc.setFontSize(18);
+  doc.text("Listado de Vehículos (menos de 10000 km)", 60, 20);
+
+  const headers = [
+    "Matrícula",
+    "Marca",
+    "Modelo",
+    "Estado",
+    "Combustible",
+    "Precio",
+  ];
+
+  autoTable(doc, {
+    startY: 30,
+    head: [headers],
+    body: vehiculos.value
+      .filter((modelo) => modelo.kilometros < 10000)
+      .map((modelo) => [
+        modelo.matricula,
+        modelo.marca,
+        modelo.modelo,
+        modelo.estado,
+        modelo.combustible,
+        modelo.precio,
+      ]),
+    theme: "striped",
+    styles: { fontSize: 10 },
+  });
+
+  doc.save("listado_vehiculos_menos_10000km.pdf");
 };
 </script>
 <style></style>

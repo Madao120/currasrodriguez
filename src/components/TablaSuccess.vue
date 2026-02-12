@@ -36,11 +36,13 @@ import logo from "../assets/logoPng.png";
 import { addFactura } from "../api/facturas";
 import { updateArticulo } from "../api/articulos";
 import { onMounted, ref } from "vue";
+import { getClientePorDni } from "../api/clientes";
 // Creamos la cesta para usar metodos y datos
 const cestaStore = useCestaStore();
 cestaStore.completarCompra();
 const facturaGuardada = ref(false);
 const articulosActualizados = ref(false);
+const cliente = ref(null);
 
 async function guardarFacturaMongo() {
   if (facturaGuardada.value || cestaStore.compraCompleta.length === 0) return;
@@ -65,6 +67,17 @@ async function guardarFacturaMongo() {
 }
 
 onMounted(async () => {
+  // Obtener el cliente logeado por su DNI
+  const userDNI = sessionStorage.getItem("userDNI");
+  if (userDNI) {
+    try {
+      cliente.value = await getClientePorDni(userDNI);
+      console.log("Cliente obtenido:", cliente.value);
+    } catch (error) {
+      console.error("Error obteniendo cliente:", error);
+    }
+  }
+
   await guardarFacturaMongo();
   await marcarArticulosVendidos();
 });
@@ -111,6 +124,11 @@ async function generarFacturaPdf() {
   doc.text("Dirección: Avenida Galicia 101, Vigo - 36216", 110, 55);
   doc.text("Tlfo: 986 666 333 - Email: regalos@example.com", 110, 60);
 
+  doc.setFontSize(9);
+  doc.text(`DNI: ${cliente.value?.dni || "N/A"}`, 10, 80);
+  doc.text(`Nombre: ${cliente.value?.nombre || "N/A"}`, 10, 90);
+  doc.text(`Email: ${cliente.value?.email || "N/A"}`, 10, 100);
+
   // Tabla de productos, marcará los headers de cada tabla
   const headers = [["ID", "Producto", "Cantidad", "Precio Unitario", "Total"]];
   //Formatea los datos para ser visibles, es un array de objetos
@@ -124,7 +142,7 @@ async function generarFacturaPdf() {
 
   //Creamos tabla en base a los headers y datos
   autoTable(doc, {
-    startY: 80,
+    startY: 110,
     head: headers,
     body: data,
     columnStyles: {
