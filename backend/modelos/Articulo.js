@@ -19,6 +19,8 @@ const ArticuloSchema = new mongoose.Schema(
 
     descripcion: { type: String },
 
+    nuevo: { type: String, required: false },
+
     ubicacion: {
       provincia: { type: String, required: true },
       ciudad: { type: String, required: true },

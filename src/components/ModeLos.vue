@@ -198,17 +198,31 @@
               class="form-control rounded-0 shadow-none border"
             />
           </div>
+          <!--Fila estado y nuevo-->
+          <div class="row g-3 align-items-center mt-2">
+            <div class="col-12 col-md-3 d-flex align-items-center">
+              <label class="form-label mb-0 me-3 text-nowrap">Estado:</label>
+              <select
+                v-model="vehiculo.estado"
+                class="form-select d-inline-block w-auto rounded-0 shadow-none border"
+              >
+                <option value="disponible">Disponible</option>
+                <option value="vendido">Vendido</option>
+                <option value="reservado">Reservado</option>
+              </select>
+            </div>
 
-          <div class="col-12 col-md-2 d-flex align-items-center">
-            <label class="orm-label mb-0 me-3 text-nowrap">Estado:</label>
-            <select
-              v-model="vehiculo.estado"
-              class="form-select d-inline-block w-auto rounded-0 shadow-none border"
-            >
-              <option value="disponible">Disponible</option>
-              <option value="vendido">Vendido</option>
-              <option value="reservado">Reservado</option>
-            </select>
+            <div class="col-12 col-md-2 d-flex align-items-center">
+              <label for="nuevo" class="form-label mb-0 me-3 text-nowrap"
+                >Nuevo:</label
+              >
+              <input
+                type="text"
+                id="nuevo"
+                v-model="vehiculo.nuevo"
+                class="form-control rounded-0 shadow-none border"
+              />
+            </div>
           </div>
         </div>
 
@@ -329,7 +343,21 @@
           </div>
         </div>
 
-        <!-- FILA: Estado y botón -->
+        <!-- FILA: Filtro de Modelo -->
+        <div class="row g-3 align-items-center mt-3">
+          <div class="col-12 col-md-6">
+            <label for="filtro_modelo" class="form-label">Filtrar por Modelo (para imprimir):</label>
+            <input
+              type="text"
+              id="filtro_modelo"
+              v-model="filtroModelo"
+              placeholder="Escribe el modelo a buscar"
+              class="form-control rounded-0 shadow-none border"
+            />
+          </div>
+        </div>
+
+        <!-- FILA: Estado y botones -->
         <div class="row g-3 align-items-center mt-3">
           <div
             class="col-12 d-flex align-items-center justify-content-center m"
@@ -352,7 +380,7 @@
                 @click="imprimirPDF"
                 class="btn btn-secondary ms-2 px-4 py-2 btn-sm rounded-0 border shadow-none"
               >
-                <i class="bi bi-printer"></i>Imprimir
+                <i class="bi bi-printer"></i>Imprimir Todo
               </button>
               <button
                 type="button"
@@ -360,6 +388,28 @@
                 class="btn btn-secondary ms-2 px-4 py-2 btn-sm rounded-0 border shadow-none"
               >
                 <i class="bi bi-printer"></i>Imprimir por km
+              </button>
+              <button
+                type="button"
+                @click="imprimirPDFPorModelo"
+                class="btn btn-secondary ms-2 px-4 py-2 btn-sm rounded-0 border shadow-none"
+                :disabled="!filtroModelo.trim()"
+              >
+                <i class="bi bi-printer"></i>Imprimir por Marca
+              </button>
+              <button
+                type="button"
+                @click="imprimirPDFAlfabetico"
+                class="btn btn-secondary ms-2 px-4 py-2 btn-sm rounded-0 border shadow-none"
+              >
+                <i class="bi bi-printer"></i>Imprimir Alfabéticamente
+              </button>
+              <button
+                type="button"
+                @click="imprimirPDFPorKm"
+                class="btn btn-secondary ms-2 px-4 py-2 btn-sm rounded-0 border shadow-none"
+              >
+                <i class="bi bi-printer"></i>Imprimir por Km (menor a mayor)
               </button>
             </div>
           </div>
@@ -445,6 +495,7 @@ const vehiculo = ref({
   },
   fecha_publicacion: "",
   estado: "disponible",
+  nuevo: "",
 });
 
 //Matrñicula en Mayúsculas
@@ -495,6 +546,8 @@ const municipios = ref([
 const municipiosFiltrados = computed(() =>
   municipios.value.filter((m) => m.prov === vehiculo.value.ubicacion.provincia),
 );
+
+const filtroModelo = ref("");
 
 // Años para el select: desde el año actual hasta 55 años atrás COPILOT
 const currentYear = new Date().getFullYear();
@@ -548,6 +601,7 @@ const guardarVehiculo = async () => {
       modelo: "",
       anio: "",
       estado: "disponible",
+      nuevo: "",
       kilometros: "",
       precio: "",
       combustible: "",
@@ -640,6 +694,133 @@ const imprimirPDFKm = () => {
   });
 
   doc.save("listado_vehiculos_menos_10000km.pdf");
+};
+
+// Imprimir PDF filtrando por modelo
+const imprimirPDFPorModelo = () => {
+  if (!filtroModelo.value.trim()) {
+    Swal.fire("Error", "Por favor, escribe un modelo para filtrar.", "warning");
+    return;
+  }
+
+  const doc = new jsPDF();
+
+  doc.addImage(logo, "png", 10, 10, 20, 20);
+  doc.setFontSize(18);
+  doc.text(`Vehículos del modelo: ${filtroModelo.value}`, 60, 20);
+
+  const headers = [
+    "Matrícula",
+    "Marca",
+    "Modelo",
+    "Estado",
+    "Combustible",
+    "Precio",
+  ];
+
+  const modeloFiltrado = vehiculos.value.filter(
+    (v) => v.marca.toLowerCase().includes(filtroModelo.value.toLowerCase())
+  );
+
+  if (modeloFiltrado.length === 0) {
+    Swal.fire("Sin resultados", `No se encontraron vehículos del modelo "${filtroModelo.value}".`, "info");
+    return;
+  }
+
+  autoTable(doc, {
+    startY: 30,
+    head: [headers],
+    body: modeloFiltrado.map((modelo) => [
+      modelo.matricula,
+      modelo.marca,
+      modelo.modelo,
+      modelo.estado,
+      modelo.combustible,
+      modelo.precio,
+    ]),
+    theme: "striped",
+    styles: { fontSize: 10 },
+  });
+
+  doc.save(`listado_vehiculos_${filtroModelo.value}.pdf`);
+};
+
+// Imprimir PDF ordenado alfabéticamente por modelo
+const imprimirPDFAlfabetico = () => {
+  const doc = new jsPDF();
+
+  doc.addImage(logo, "png", 10, 10, 20, 20);
+  doc.setFontSize(18);
+  doc.text("Listado de Vehículos (Ordenado por Modelo)", 60, 20);
+
+  const headers = [
+    "Matrícula",
+    "Marca",
+    "Modelo",
+    "Estado",
+    "Combustible",
+    "Precio",
+  ];
+
+  const vehiculosOrdenados = [...vehiculos.value].sort((a, b) =>
+    a.modelo.localeCompare(b.modelo)
+  );
+
+  autoTable(doc, {
+    startY: 30,
+    head: [headers],
+    body: vehiculosOrdenados.map((modelo) => [
+      modelo.matricula,
+      modelo.marca,
+      modelo.modelo,
+      modelo.estado,
+      modelo.combustible,
+      modelo.precio,
+    ]),
+    theme: "striped",
+    styles: { fontSize: 10 },
+  });
+
+  doc.save("listado_vehiculos_alfabetico.pdf");
+};
+
+// Imprimir PDF ordenado por kilómetros (menor a mayor)
+const imprimirPDFPorKm = () => {
+  const doc = new jsPDF();
+
+  doc.addImage(logo, "png", 10, 10, 20, 20);
+  doc.setFontSize(18);
+  doc.text("Listado de Vehículos (Ordenado por Km)", 60, 20);
+
+  const headers = [
+    "Matrícula",
+    "Marca",
+    "Modelo",
+    "Km",
+    "Estado",
+    "Precio",
+  ];
+
+  const vehiculosOrdenados = [...vehiculos.value].sort((a, b) =>
+    a.kilometros - b.kilometros
+  );
+
+  autoTable(doc, {
+    startY: 30,
+    head: [headers],
+    body: vehiculosOrdenados.map((modelo) => [
+      modelo.matricula,
+      modelo.marca,
+      modelo.modelo,
+      modelo.kilometros,
+      modelo.estado,
+      modelo.precio,
+    ]),
+    theme: "striped",
+    styles: { fontSize: 10 },
+  });
+
+  doc.save("listado_vehiculos_por_km.pdf");
 };
 </script>
 <style></style>

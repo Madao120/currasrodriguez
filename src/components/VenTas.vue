@@ -34,13 +34,20 @@
                             {{ car.estado === 'disponible' ? 'Añadir Cesta' : 'No disponible' }}
                             
                             </button>
-                        <!--Qate boton es el de reservar, chatgpteada-->
+                        <!--BOTON DE RESERVAR-->
                         <button
                             class="btn badge btn-sm btn-warning ms-2"
                             :disabled="car.estado !== 'disponible'"
                             @click.stop="irAReserva(car)"
                         >
                             <i class="bi bi-bookmark-check me-1"></i> Reservar
+                        </button>
+                        <button
+                            class="btn badge btn-sm btn-warning ms-2"
+                            :disabled="car.estado !== 'disponible'"
+                            @click.stop="reservarDirecto(car)"
+                        >
+                            <i class="bi bi-bookmark-check me-1"></i> Reservar Directo
                         </button>
 
                         <!--Boton de vista-->
@@ -50,7 +57,17 @@
                         >
                             <i class="bi bi-bookmark-check me-1"></i> Ver detalles del Vehículo
                         </button>
+                        
+                        <!--Cancelar Reserva-->
+                        <button v-if="car.estado === 'reservado' && isAdmin"
+                        class="btn badge btn-sm btn-danger ms-2"
+                        :disabled="car.estado !== 'reservado'"
+                        @click.stop="cancelarReserva(car)"
+                        >
+                        <i class="bi bi-x-circle me-1"></i> Cancelar reserva
+                        </button>
 
+                        <!--Imprimir un solo coche-->
                         <button
                             type="button"
                             @click="imprimirPDF(car)"
@@ -75,17 +92,20 @@
 import { ref, onMounted } from "vue";
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
-import { getArticulos } from "@/api/articulos.js";
+import { getArticulos, updateArticulo } from "@/api/articulos.js";
 import { useCestaStore } from "@/store/cesta.js";
 import logo from "../assets/logoPng.png";
+import Swal from "sweetalert2";
 // Importamos router para
 import { useRouter } from "vue-router";
 const router = useRouter();
 const cestaStore = useCestaStore();
 
 const vehiculos = ref([]);
+const isAdmin = ref(false);
 
 onMounted(async () => {
+    isAdmin.value = sessionStorage.getItem("isAdmin") === "true";
     vehiculos.value = await getArticulos();
     for (const element of vehiculos.value) {
         console.log(element.imagen);
@@ -108,10 +128,53 @@ const agregarACesta = (vehiculo) => {
         imagen: urlImagen(vehiculo.imagen),
     });
 };
+
 //Reserva de vehiculo
 const irAReserva = (vehiculo) => {
     if (vehiculo.estado !== "disponible") return;
     router.push({ name: "ReservaVehiculo", params: { id: vehiculo._id } });
+};
+
+// Función comentada para reservar el vehículo directamente sin ir a otra página
+// Si quieres usar esta función, descomenta y cambia @click="irAReserva(car)" por @click="reservarDirecto(car)"
+
+const reservarDirecto = async (vehiculo) => {
+  if (vehiculo.estado !== "disponible") return;
+
+  try {
+    const actualizado = await updateArticulo(vehiculo._id, {
+      estado: "reservado",
+    });
+    const index = vehiculos.value.findIndex((item) => item._id === vehiculo._id);
+    if (index !== -1) {
+      vehiculos.value[index] = actualizado;
+    }
+    Swal.fire("Reserva realizada", "El vehículo ha sido reservado correctamente.", "success");
+  } catch (error) {
+    console.error("Error reservando vehículo:", error);
+    Swal.fire("Error", "No se pudo reservar el vehículo.", "error");
+  }
+};
+
+
+// Cancelar Reserva si eres admin
+const cancelarReserva = async (vehiculo) => {
+  if (!isAdmin.value) return;
+  if (vehiculo.estado !== "reservado") return;
+
+  try {
+    const actualizado = await updateArticulo(vehiculo._id, {
+      estado: "disponible",
+    });
+        const index = vehiculos.value.findIndex((item) => item._id === vehiculo._id);
+        if (index !== -1) {
+            vehiculos.value[index] = actualizado;
+        }
+    Swal.fire("Reserva cancelada", "El vehiculo vuelve a estar disponible.", "success");
+  } catch (error) {
+    console.error("Error cancelando reserva:", error);
+    Swal.fire("Error", "No se pudo cancelar la reserva.", "error");
+  }
 };
 
 //Vista de Coche

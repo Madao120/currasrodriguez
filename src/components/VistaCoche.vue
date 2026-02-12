@@ -47,6 +47,30 @@
               <strong>Descripción:</strong><br />
               {{ vehiculo.descripcion }}
             </p>
+            <!--Qate boton es el de reservar, chatgpteada-->
+            <button
+                class="btn badge btn-sm btn-warning ms-2"
+                :disabled="vehiculo.estado !== 'disponible'"
+                @click.stop="irAReserva(vehiculo)"
+            >
+                <i class="bi bi-bookmark-check me-1"></i> Reservar
+            </button>
+            <button
+              v-if="vehiculo.estado === 'reservado' && isAdmin"
+              class="btn badge btn-sm btn-danger ms-2"
+              :disabled="vehiculo.estado !== 'reservado'"
+              @click.stop="cancelarReserva(vehiculo)"
+            >
+              <i class="bi bi-x-circle me-1"></i> Cancelar reserva
+            </button>
+
+            <button
+                type="button"
+                @click="imprimirPDF(vehiculo)"
+                class="btn btn-secondary ms-2 px-4 py-2 btn-sm rounded-0 border shadow-none"
+            >
+                <i class="bi bi-printer"></i>Imprimir
+            </button>
           </div>
         </div>
       </div>
@@ -60,16 +84,22 @@
 <script setup>
 import { onMounted, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import { getArticuloById } from "@/api/articulos.js";
+import { getArticuloById, updateArticulo } from "@/api/articulos.js";
+import { jsPDF } from "jspdf";
+import autoTable from "jspdf-autotable";
+import logo from "../assets/logoPng.png";
+import Swal from "sweetalert2";
 
 const route = useRoute();
 const router = useRouter();
 
 const vehiculo = ref(null);
 const cargando = ref(true);
+const isAdmin = ref(false);
 
 onMounted(async () => {
   try {
+    isAdmin.value = sessionStorage.getItem("isAdmin") === "true";
     const id = route.params.id;
     if (!id) return;
     vehiculo.value = await getArticuloById(id);
@@ -88,6 +118,67 @@ const urlImagen = (ruta) => {
 function volver() {
   router.push({ name: "VenTas" });
 }
+
+//Reserva de vehiculo
+const irAReserva = (vehiculo) => {
+    if (vehiculo.estado !== "disponible") return;
+    router.push({ name: "ReservaVehiculo", params: { id: vehiculo._id } });
+};
+
+// Cancelar Reserva si eres admin
+const cancelarReserva = async (vehiculo) => {
+  if (!isAdmin.value) return;
+  if (vehiculo.estado !== "reservado") return;
+
+  try {
+    const actualizado = await updateArticulo(vehiculo._id, {
+      estado: "disponible",
+    });
+    vehiculo.value = actualizado;
+    Swal.fire("Reserva cancelada", "El vehiculo vuelve a estar disponible.", "success");
+  } catch (error) {
+    console.error("Error cancelando reserva:", error);
+    Swal.fire("Error", "No se pudo cancelar la reserva.", "error");
+  }
+};
+
+
+//Imprimir coche PDF
+const imprimirPDF = (vehiculo) => {
+  const doc = new jsPDF();
+
+  doc.addImage(logo, "png", 10, 10, 20, 20);
+    doc.setFontSize(18);
+    doc.text("Ficha de Vehículo", 60, 20);
+
+  const headers = [
+    "Matrícula",
+    "Marca",
+    "Modelo",
+    "Estado",
+    "Combustible",
+    "Precio",
+  ];
+
+    autoTable(doc, {
+    startY: 30,
+    head: [headers],
+        body: [
+            [
+                vehiculo.matricula,
+                vehiculo.marca,
+                vehiculo.modelo,
+                vehiculo.estado,
+                vehiculo.combustible,
+                vehiculo.precio,
+            ],
+        ],
+    theme: "striped",
+    styles: { fontSize: 10 },
+  });
+
+    doc.save(`vehiculo_${vehiculo.matricula || vehiculo._id}.pdf`);
+};
 </script>
 
 <style scoped>
