@@ -78,6 +78,7 @@ export const useCestaStore = defineStore("cesta", () => {
     items.value = [];
     compraCompleta.value = [];
     sessionStorage.removeItem("items");
+    sessionStorage.removeItem("codigoDescuento");
   }
 
   //Cuando se crea el objeto mira si hay un items en el sessionStorage, si lo hay le asigna el valor a items.
@@ -100,6 +101,12 @@ export const useCestaStore = defineStore("cesta", () => {
   */
   let codigoDescuento = ref("");
   let isGastosEnvio = ref(false);
+
+  const descuentoData = sessionStorage.getItem("codigoDescuento");
+  if (descuentoData) {
+    codigoDescuento.value = descuentoData;
+  }
+
   let precioFinal = computed(() => {
     let precio = totalPrecio.value;
 
@@ -126,6 +133,10 @@ export const useCestaStore = defineStore("cesta", () => {
     },
     { deep: true },
   );
+
+  watch(codigoDescuento, (nuevoCodigo) => {
+    sessionStorage.setItem("codigoDescuento", nuevoCodigo || "");
+  });
 
   return {
     items,

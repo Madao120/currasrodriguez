@@ -343,20 +343,6 @@
           </div>
         </div>
 
-        <!-- FILA: Filtro de Modelo -->
-        <div class="row g-3 align-items-center mt-3">
-          <div class="col-12 col-md-6">
-            <label for="filtro_modelo" class="form-label">Filtrar por Modelo (para imprimir):</label>
-            <input
-              type="text"
-              id="filtro_modelo"
-              v-model="filtroModelo"
-              placeholder="Escribe el modelo a buscar"
-              class="form-control rounded-0 shadow-none border"
-            />
-          </div>
-        </div>
-
         <!-- FILA: Estado y botones -->
         <div class="row g-3 align-items-center mt-3">
           <div
@@ -391,14 +377,6 @@
               </button>
               <button
                 type="button"
-                @click="imprimirPDFPorModelo"
-                class="btn btn-secondary ms-2 px-4 py-2 btn-sm rounded-0 border shadow-none"
-                :disabled="!filtroModelo.trim()"
-              >
-                <i class="bi bi-printer"></i>Imprimir por Marca
-              </button>
-              <button
-                type="button"
                 @click="imprimirPDFAlfabetico"
                 class="btn btn-secondary ms-2 px-4 py-2 btn-sm rounded-0 border shadow-none"
               >
@@ -415,6 +393,26 @@
           </div>
         </div>
       </form>
+      <div v-if="isAdmin" class="row g-2 align-items-center mt-2 mb-2">
+        <div class="col-12 col-md-6">
+          <input
+            type="text"
+            v-model="filtroModelo"
+            placeholder="Buscar por modelo"
+            class="form-control rounded-0 shadow-none border"
+          />
+        </div>
+        <div class="col-12 col-md-6">
+          <button
+            type="button"
+            @click="imprimirPDFPorModelo"
+            class="btn btn-secondary px-4 py-2 btn-sm rounded-0 border shadow-none"
+            :disabled="!filtroModelo.trim()"
+          >
+            <i class="bi bi-printer"></i>Imprimir filtrados
+          </button>
+        </div>
+      </div>
       <table
         v-if="isAdmin"
         class="table table-bordered table-striped table-sm table-hover align-middle"
@@ -430,7 +428,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="modelo in vehiculos" :key="modelo._id" class="text-center">
+          <tr v-for="modelo in vehiculosFiltrados" :key="modelo._id" class="text-center">
             <td>{{ modelo.matricula }}</td>
             <td>{{ modelo.marca }}</td>
             <td>{{ modelo.modelo }}</td>
@@ -548,6 +546,16 @@ const municipiosFiltrados = computed(() =>
 );
 
 const filtroModelo = ref("");
+
+const vehiculosFiltrados = computed(() => {
+  const query = filtroModelo.value.trim().toLowerCase();
+  if (!query) return vehiculos.value;
+
+  return vehiculos.value.filter((vehiculo) => {
+    const modelo = String(vehiculo.modelo || "").toLowerCase();
+    return modelo.includes(query);
+  });
+});
 
 // Años para el select: desde el año actual hasta 55 años atrás COPILOT
 const currentYear = new Date().getFullYear();
@@ -718,9 +726,7 @@ const imprimirPDFPorModelo = () => {
     "Precio",
   ];
 
-  const modeloFiltrado = vehiculos.value.filter(
-    (v) => v.marca.toLowerCase().includes(filtroModelo.value.toLowerCase())
-  );
+  const modeloFiltrado = vehiculosFiltrados.value;
 
   if (modeloFiltrado.length === 0) {
     Swal.fire("Sin resultados", `No se encontraron vehículos del modelo "${filtroModelo.value}".`, "info");

@@ -1,8 +1,18 @@
 <template>
     <div class="container-fluid mt-4 mb-4">
+        <div class="row mb-3">
+            <div class="col-12 col-md-6">
+                <input
+                    v-model="busquedaModelo"
+                    type="text"
+                    class="form-control"
+                    placeholder="Buscar por modelo"
+                />
+            </div>
+        </div>
         <div class="row g-4">
             <div 
-            v-for="car in vehiculos"
+            v-for="car in vehiculosFiltrados"
             :key="car._id"
             class="col-12 col-md-6 col-lg-3"
             >
@@ -23,58 +33,60 @@
                         </p>   
                     </div>
 
-                    <div class="card-footer text-end bg-white">
-                        <span class="badge bg-primary">{{ car.estado }}</span>
-                        <button 
-                            class="btn badge btn-sm btn-success ms-2"
-                            :class="car.estado === 'disponible' ? 'btn-success' : 'btn-danger'"
-                            :disabled="car.estado !== 'disponible'"
-                            @click.stop="agregarACesta(car)">
-                            <i class="bi bi-cart3 me-1"></i>
-                            {{ car.estado === 'disponible' ? 'Añadir Cesta' : 'No disponible' }}
-                            
+                    <div class="card-footer bg-white card-actions">
+                        <div class="status-row">
+                            <span class="badge bg-primary">{{ car.estado }}</span>
+                        </div>
+                        <div class="button-grid">
+                            <button 
+                                class="btn badge btn-sm btn-success"
+                                :class="car.estado === 'disponible' ? 'btn-success' : 'btn-danger'"
+                                :disabled="car.estado !== 'disponible'"
+                                @click.stop="agregarACesta(car)">
+                                <i class="bi bi-cart3 me-1"></i>
+                                {{ car.estado === 'disponible' ? 'Añadir Cesta' : 'No disponible' }}
                             </button>
-                        <!--BOTON DE RESERVAR-->
-                        <button
-                            class="btn badge btn-sm btn-warning ms-2"
-                            :disabled="car.estado !== 'disponible'"
-                            @click.stop="irAReserva(car)"
-                        >
-                            <i class="bi bi-bookmark-check me-1"></i> Reservar
-                        </button>
-                        <button
-                            class="btn badge btn-sm btn-warning ms-2"
-                            :disabled="car.estado !== 'disponible'"
-                            @click.stop="reservarDirecto(car)"
-                        >
-                            <i class="bi bi-bookmark-check me-1"></i> Reservar Directo
-                        </button>
+                            <!--Boton de vista-->
+                            <button
+                                class="btn badge btn-sm bg-primary"
+                                @click.stop="irAVista(car)"
+                            >
+                                <i class="bi bi-bookmark-check me-1"></i> Ver detalles del Vehículo
+                            </button>
+                            <!--BOTON DE RESERVAR-->
+                            <button
+                                class="btn badge btn-sm btn-warning"
+                                :disabled="car.estado !== 'disponible'"
+                                @click.stop="irAReserva(car)"
+                            >
+                                <i class="bi bi-bookmark-check me-1"></i> Reservar
+                            </button>
+                            <button
+                                class="btn badge btn-sm btn-warning"
+                                :disabled="car.estado !== 'disponible'"
+                                @click.stop="reservarDirecto(car)"
+                            >
+                                <i class="bi bi-bookmark-check me-1"></i> Reservar Directo
+                            </button>
+                            
+                            <!--Cancelar Reserva-->
+                            <button v-if="car.estado === 'reservado' && isAdmin"
+                            class="btn badge btn-sm btn-danger"
+                            :disabled="car.estado !== 'reservado'"
+                            @click.stop="cancelarReserva(car)"
+                            >
+                            <i class="bi bi-x-circle me-1"></i> Cancelar reserva
+                            </button>
 
-                        <!--Boton de vista-->
-                        <button
-                            class="btn badge btn-sm bg-primary ms-2"
-                            @click.stop="irAVista(car)"
-                        >
-                            <i class="bi bi-bookmark-check me-1"></i> Ver detalles del Vehículo
-                        </button>
-                        
-                        <!--Cancelar Reserva-->
-                        <button v-if="car.estado === 'reservado' && isAdmin"
-                        class="btn badge btn-sm btn-danger ms-2"
-                        :disabled="car.estado !== 'reservado'"
-                        @click.stop="cancelarReserva(car)"
-                        >
-                        <i class="bi bi-x-circle me-1"></i> Cancelar reserva
-                        </button>
-
-                        <!--Imprimir un solo coche-->
-                        <button
-                            type="button"
-                            @click="imprimirPDF(car)"
-                            class="btn btn-secondary ms-2 px-4 py-2 btn-sm rounded-0 border shadow-none"
-                        >
-                            <i class="bi bi-printer"></i>Imprimir
-                        </button>
+                            <!--Imprimir un solo coche-->
+                            <button
+                                type="button"
+                                @click="imprimirPDF(car)"
+                                class="btn btn-secondary btn-sm rounded-0 border shadow-none"
+                            >
+                                <i class="bi bi-printer"></i>Imprimir
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -89,7 +101,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed } from "vue";
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
 import { getArticulos, updateArticulo } from "@/api/articulos.js";
@@ -103,6 +115,19 @@ const cestaStore = useCestaStore();
 
 const vehiculos = ref([]);
 const isAdmin = ref(false);
+
+//Barra de búsqueda
+const busquedaModelo = ref("");
+
+const vehiculosFiltrados = computed(() => {
+    const query = busquedaModelo.value.trim().toLowerCase();
+    if (!query) return vehiculos.value;
+
+    return vehiculos.value.filter((car) => {
+        const modelo = String(car.modelo || "").toLowerCase();
+        return modelo.includes(query);
+    });
+});
 
 onMounted(async () => {
     isAdmin.value = sessionStorage.getItem("isAdmin") === "true";
@@ -224,5 +249,29 @@ const imprimirPDF = (vehiculo) => {
 .card-title{
     font-weight: bold;
     text-transform: capitalize;
+}
+
+.card-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.card-actions .status-row {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.card-actions .button-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    justify-content: flex-end;
+}
+
+.card-actions .btn {
+    width: 100%;
+    white-space: normal;
+    line-height: 1.2;
 }
 </style>
