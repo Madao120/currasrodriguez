@@ -9,3 +9,7 @@ export async function addFactura(factura) {
     throw error;
   }
 }
+
+export const getFacturas = () => {
+  return axios.get(API_URL).then((res) => res.data);
+};

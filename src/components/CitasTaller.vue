@@ -127,6 +127,13 @@
         >
           Cancelar
         </button>
+        <button
+          class="btn btn-warning m-1"
+          :disabled="!isAdmin"
+          @click="verPendientes"
+        >
+          Ver Pendientes
+        </button>
       </div>
     </form>
 
@@ -180,12 +187,24 @@
 import { ref, onMounted } from "vue";
 import { getCita, guardarCita, deleteCita, updateCita } from "../api/citas";
 import Swal from "sweetalert2";
+import isAdmin from "./NavBar.vue";
 
 //Lista donde guardaré las citas
 const citas = ref([]);
 
 // Boolean para saber si estoy editando
 const editando = ref(false);
+
+// Pendientes
+const pendiente = ref(false);
+
+async function verPendientes() {
+  if (pendiente) {
+    pendiente == false;
+  } else {
+    pendiente == true;
+  }
+}
 
 // Formulario de Nueva Cita
 const nuevaCita = ref({

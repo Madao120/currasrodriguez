@@ -14,7 +14,7 @@ import TablaSuccess from "../../src/components/TablaSuccess.vue";
 import ReservaVehiculo from "../../src/components/ReservaVehiculo.vue";
 import VistaCoche from "../../src/components/VistaCoche.vue";
 import CochesOrdenados from "../../src/components/CochesOrdenados.vue";
-import FormEmpleo from "../../src/components/FormEmpleo.vue";
+import Facturas from "../../src/components/Facturas.vue";
 import FormEmpleoEnvio from "../../src/components/FormEmpleoEnvio.vue";
 
 import { createRouter, createWebHistory } from "vue-router";
@@ -102,9 +102,9 @@ const routes = [
     component: CochesOrdenados,
   },
   {
-    path: "/form-empleo",
-    name: "FormEmpleo",
-    component: FormEmpleo,
+    path: "/facturas",
+    name: "Facturas",
+    component: Facturas,
   },
   {
     path: "/form-empleo-envio",

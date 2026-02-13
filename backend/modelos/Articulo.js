@@ -19,8 +19,6 @@ const ArticuloSchema = new mongoose.Schema(
 
     descripcion: { type: String },
 
-    nuevo: { type: String, required: false },
-
     ubicacion: {
       provincia: { type: String, required: true },
       ciudad: { type: String, required: true },
@@ -42,7 +40,7 @@ const ArticuloSchema = new mongoose.Schema(
   // Nombre explícito de la colección en la base de datos
   {
     collection: "articulos",
-  }
+  },
 );
 
 export default mongoose.model("Articulo", ArticuloSchema);

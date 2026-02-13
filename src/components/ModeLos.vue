@@ -368,6 +368,7 @@
               >
                 <i class="bi bi-printer"></i>Imprimir Todo
               </button>
+              <!--
               <button
                 type="button"
                 @click="imprimirPDFKm"
@@ -389,6 +390,7 @@
               >
                 <i class="bi bi-printer"></i>Imprimir por Km (menor a mayor)
               </button>
+              -->
             </div>
           </div>
         </div>
@@ -422,17 +424,24 @@
             <th>Matricula</th>
             <th>Marca</th>
             <th>Modelo</th>
-            <th>Año</th>
+            <th>Modelo</th>
             <th>Precio</th>
             <th>Estado</th>
           </tr>
         </thead>
         <tbody>
-          <tr v-for="modelo in vehiculosFiltrados" :key="modelo._id" class="text-center">
+          <tr
+            v-for="modelo in vehiculosFiltrados"
+            :key="modelo._id"
+            class="text-center"
+          >
             <td>{{ modelo.matricula }}</td>
             <td>{{ modelo.marca }}</td>
             <td>{{ modelo.modelo }}</td>
-            <td>{{ modelo.estado }}</td>
+            <td v-if="modelo.estado == 'reservado'" class="table-warning">
+              {{ modelo.estado }}
+            </td>
+            <td v-else>{{ modelo.estado }}</td>
             <td>
               <div>
                 {{ modelo.contacto.nombre }} {{ modelo.contacto.telefono }}
@@ -729,7 +738,11 @@ const imprimirPDFPorModelo = () => {
   const modeloFiltrado = vehiculosFiltrados.value;
 
   if (modeloFiltrado.length === 0) {
-    Swal.fire("Sin resultados", `No se encontraron vehículos del modelo "${filtroModelo.value}".`, "info");
+    Swal.fire(
+      "Sin resultados",
+      `No se encontraron vehículos del modelo "${filtroModelo.value}".`,
+      "info",
+    );
     return;
   }
 
@@ -769,7 +782,7 @@ const imprimirPDFAlfabetico = () => {
   ];
 
   const vehiculosOrdenados = [...vehiculos.value].sort((a, b) =>
-    a.modelo.localeCompare(b.modelo)
+    a.modelo.localeCompare(b.modelo),
   );
 
   autoTable(doc, {
@@ -798,17 +811,10 @@ const imprimirPDFPorKm = () => {
   doc.setFontSize(18);
   doc.text("Listado de Vehículos (Ordenado por Km)", 60, 20);
 
-  const headers = [
-    "Matrícula",
-    "Marca",
-    "Modelo",
-    "Km",
-    "Estado",
-    "Precio",
-  ];
+  const headers = ["Matrícula", "Marca", "Modelo", "Km", "Estado", "Precio"];
 
-  const vehiculosOrdenados = [...vehiculos.value].sort((a, b) =>
-    a.kilometros - b.kilometros
+  const vehiculosOrdenados = [...vehiculos.value].sort(
+    (a, b) => a.kilometros - b.kilometros,
   );
 
   autoTable(doc, {

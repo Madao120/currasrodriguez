@@ -46,7 +46,7 @@
           </tr>
         </tbody>
         <tfoot>
-          <tr class="fw-bold">
+          <!--
             <td>
               <input
                 type="text"
@@ -59,10 +59,26 @@
               Si el pedido supera los 20.000€, no se aplicarán los gastos de
               envío
             </td>
-            <td :colspan="cesta.isGastosEnvio ? 1 : 2" class="text-end">
-              Total
+          -->
+          <tr class="fw-bold">
+            <td
+              v-if="cliente.tipo_cliente == 'particular'"
+              colspan="4"
+              class="justify-content-end text-end"
+            >
+              IVA 21% {{ cesta.precioFinal * 0.21 }} €
             </td>
-            <td>{{ cesta.precioFinal }} €</td>
+            <td v-else colspan="4" class="justify-content-end text-end">
+              IVA 10% {{ cesta.precioFinal * 0.1 }} €
+            </td>
+            <td colspan="2"></td>
+          </tr>
+          <tr class="fw-bold">
+            <td :colspan="3" class="text-end">Total</td>
+            <td v-if="cliente.tipo_cliente == 'particular'">
+              {{ cesta.precioFinal * 1.21 }} €
+            </td>
+            <td v-else>{{ cesta.precioFinal * 1.1 }} €</td>
             <td class="d-flex justify-center align-center flex-row">
               <button
                 :disabled="!isLogueado"
@@ -85,10 +101,11 @@
 </template>
 
 <script setup>
-import { ref, computed } from "vue";
+import { onMounted, ref } from "vue";
 import { useCestaStore } from "@/store/cesta.js";
 import axios from "axios";
 import Swal from "sweetalert2";
+import { getClientePorDni } from "../api/clientes";
 // import isLogueado from "./NavBar.vue";
 
 const cesta = useCestaStore();
@@ -97,6 +114,23 @@ const isLogueado = sessionStorage.getItem("token") !== null;
 const incrementar = (id) => cesta.incrementarCantidad(id);
 const decrementar = (id) => cesta.decrementarCantidad(id);
 const removeProducto = (id) => cesta.removeProducto(id);
+
+const cliente = ref("");
+
+onMounted(async () => {
+  // Obtener el cliente logeado por su DNI
+  const userDNI = sessionStorage.getItem("userDNI");
+  if (userDNI) {
+    try {
+      cliente.value = await getClientePorDni(userDNI);
+      console.log("Cliente obtenido:", cliente.value);
+      if (cliente.tipo_cliente == "particular") {
+      }
+    } catch (error) {
+      console.error("Error obteniendo cliente:", error);
+    }
+  }
+});
 
 // Iniciar pago con Stripe usando axios
 const iniciarPago = async () => {

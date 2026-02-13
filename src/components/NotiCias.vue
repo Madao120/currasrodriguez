@@ -97,6 +97,13 @@
                   >
                     Eliminar
                   </button>
+                  <br />
+                  <button
+                    class="btn-warning text-end"
+                    @click="darLike(noticia.id, noticia)"
+                  >
+                    <i class="bi bi-hand-thumbs-up"></i>{{ noticia.likes }}
+                  </button>
                 </div>
               </td>
             </tr>
@@ -116,6 +123,20 @@
 import { ref, computed, onMounted } from "vue";
 import axios from "axios";
 import Swal from "sweetalert2";
+import { updateNoticia } from "../api/noticias";
+
+const totalPuntos = ref(0);
+
+const darLike = async (id, noticia) => {
+  totalPuntos.value += 1;
+
+  try {
+    noticia.likes += 1;
+    await updateNoticia(id, noticia);
+  } catch (error) {
+    console.error("Fallo al eliminar de la base de datos", error);
+  }
+};
 
 const PREVIEW_LIMIT = 128;
 const nuevoTitulo = ref("");
@@ -133,7 +154,7 @@ onMounted(async () => {
 });
 
 const noticiasOrdenadas = computed(() =>
-  [...noticias.value].sort((a, b) => new Date(b.fecha) - new Date(a.fecha))
+  [...noticias.value].sort((a, b) => new Date(b.fecha) - new Date(a.fecha)),
 );
 
 function truncarTexto(texto, limite = PREVIEW_LIMIT) {
@@ -164,7 +185,7 @@ async function agregarNoticia() {
     id: String(
       noticias.value.length > 0
         ? Math.max(...noticias.value.map((n) => n.id)) + 1
-        : 1
+        : 1,
     ),
     titulo: nuevoTitulo.value.trim(),
     contenido: nuevoContenido.value.trim(),

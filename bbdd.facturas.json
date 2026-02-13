@@ -1,0 +1,339 @@
+[{
+  "_id": {
+    "$oid": "69831bd0cc00da53aae68e95"
+  },
+  "productos": [
+    {
+      "productoId": "690b1a9f7e347ebd181254a8",
+      "nombre": "Peugeot 208",
+      "cantidad": 1,
+      "precio_unitario": 9700,
+      "_id": {
+        "$oid": "69831bd0cc00da53aae68e96"
+      }
+    },
+    {
+      "productoId": "690b1a9f7e347ebd181254a7",
+      "nombre": "Volkswagen Golf",
+      "cantidad": 1,
+      "precio_unitario": 15800,
+      "_id": {
+        "$oid": "69831bd0cc00da53aae68e97"
+      }
+    }
+  ],
+  "total": 25500,
+  "fecha": {
+    "$date": "2026-02-04T10:13:36.880Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "69831ef6ceeba3049ba59b3d"
+  },
+  "productos": [
+    {
+      "productoId": "690b1a9f7e347ebd181254a8",
+      "nombre": "Peugeot 208",
+      "cantidad": 1,
+      "precio_unitario": 9700,
+      "_id": {
+        "$oid": "69831ef6ceeba3049ba59b3e"
+      }
+    }
+  ],
+  "total": 9700,
+  "fecha": {
+    "$date": "2026-02-04T10:27:02.917Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "698447188d0f3f8917744a5b"
+  },
+  "productos": [
+    {
+      "productoId": "690b1a9f7e347ebd181254a7",
+      "nombre": "Volkswagen Golf",
+      "cantidad": 1,
+      "precio_unitario": 15800,
+      "_id": {
+        "$oid": "698447188d0f3f8917744a5c"
+      }
+    },
+    {
+      "productoId": "690b1a9f7e347ebd181254a8",
+      "nombre": "Peugeot 208",
+      "cantidad": 1,
+      "precio_unitario": 9700,
+      "_id": {
+        "$oid": "698447188d0f3f8917744a5d"
+      }
+    }
+  ],
+  "total": 25500,
+  "fecha": {
+    "$date": "2026-02-05T07:30:32.987Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "698996efd3f394d7582e1f0d"
+  },
+  "productos": [
+    {
+      "productoId": "690b1a9f7e347ebd181254a7",
+      "nombre": "Volkswagen Golf",
+      "cantidad": 1,
+      "precio_unitario": 15800,
+      "_id": {
+        "$oid": "698996efd3f394d7582e1f0e"
+      }
+    }
+  ],
+  "total": 15800,
+  "fecha": {
+    "$date": "2026-02-09T08:12:31.207Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "698c492783c4c7d25399da20"
+  },
+  "productos": [
+    {
+      "productoId": "6909b9faf474abc658dc6e54",
+      "nombre": "Toyota Corolla",
+      "cantidad": 1,
+      "precio_unitario": 13500,
+      "_id": {
+        "$oid": "698c492783c4c7d25399da21"
+      }
+    }
+  ],
+  "total": 13500,
+  "fecha": {
+    "$date": "2026-02-11T09:17:27.511Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "698d82c639be93aa08539951"
+  },
+  "productos": [
+    {
+      "productoId": "690b1a9f7e347ebd181254a8",
+      "nombre": "Peugeot 208",
+      "cantidad": 1,
+      "precio_unitario": 9700,
+      "_id": {
+        "$oid": "698d82c639be93aa08539952"
+      }
+    },
+    {
+      "productoId": "690b1a9f7e347ebd181254a9",
+      "nombre": "Tesla Model 3",
+      "cantidad": 1,
+      "precio_unitario": 32500,
+      "_id": {
+        "$oid": "698d82c639be93aa08539953"
+      }
+    }
+  ],
+  "total": 42200,
+  "fecha": {
+    "$date": "2026-02-12T07:35:34.860Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "698d83d139be93aa0853995a"
+  },
+  "productos": [
+    {
+      "productoId": "690b1a9f7e347ebd181254a7",
+      "nombre": "Volkswagen Golf",
+      "cantidad": 1,
+      "precio_unitario": 15800,
+      "_id": {
+        "$oid": "698d83d139be93aa0853995b"
+      }
+    },
+    {
+      "productoId": "6909b9faf474abc658dc6e54",
+      "nombre": "Toyota Corolla",
+      "cantidad": 2,
+      "precio_unitario": 13500,
+      "_id": {
+        "$oid": "698d83d139be93aa0853995c"
+      }
+    }
+  ],
+  "total": 42800,
+  "fecha": {
+    "$date": "2026-02-12T07:40:01.155Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "698d847b39be93aa08539961"
+  },
+  "productos": [
+    {
+      "productoId": "690b1a9f7e347ebd181254a8",
+      "nombre": "Peugeot 208",
+      "cantidad": 2,
+      "precio_unitario": 9700,
+      "_id": {
+        "$oid": "698d847b39be93aa08539962"
+      }
+    }
+  ],
+  "total": 19400,
+  "fecha": {
+    "$date": "2026-02-12T07:42:51.170Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "698d858cde275d57e9c59cfe"
+  },
+  "productos": [
+    {
+      "productoId": "690b1a9f7e347ebd181254ab",
+      "nombre": "Renault Clio",
+      "cantidad": 2,
+      "precio_unitario": 6800,
+      "_id": {
+        "$oid": "698d858cde275d57e9c59cff"
+      }
+    }
+  ],
+  "total": 13600,
+  "fecha": {
+    "$date": "2026-02-12T07:47:24.409Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "698d866257c5213b49cc92ab"
+  },
+  "productos": [
+    {
+      "productoId": "690b1a9f7e347ebd181254a7",
+      "nombre": "Volkswagen Golf",
+      "cantidad": 1,
+      "precio_unitario": 15800,
+      "_id": {
+        "$oid": "698d866257c5213b49cc92ac"
+      }
+    },
+    {
+      "productoId": "690b1a9f7e347ebd181254a8",
+      "nombre": "Peugeot 208",
+      "cantidad": 1,
+      "precio_unitario": 9700,
+      "_id": {
+        "$oid": "698d866257c5213b49cc92ad"
+      }
+    }
+  ],
+  "total": 25500,
+  "fecha": {
+    "$date": "2026-02-12T07:50:58.274Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "698d92e46b2a288e9b3a2a91"
+  },
+  "productos": [
+    {
+      "productoId": "6909b9faf474abc658dc6e54",
+      "nombre": "Toyota Corolla",
+      "cantidad": 3,
+      "precio_unitario": 13500,
+      "_id": {
+        "$oid": "698d92e46b2a288e9b3a2a92"
+      }
+    }
+  ],
+  "total": 40500,
+  "fecha": {
+    "$date": "2026-02-12T08:44:20.877Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "698d93506b2a288e9b3a2a97"
+  },
+  "productos": [
+    {
+      "productoId": "690b1a9f7e347ebd181254a8",
+      "nombre": "Peugeot 208",
+      "cantidad": 3,
+      "precio_unitario": 9700,
+      "_id": {
+        "$oid": "698d93506b2a288e9b3a2a98"
+      }
+    }
+  ],
+  "total": 29100,
+  "fecha": {
+    "$date": "2026-02-12T08:46:08.591Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "698d93716b2a288e9b3a2a9c"
+  },
+  "productos": [
+    {
+      "productoId": "690b1a9f7e347ebd181254a7",
+      "nombre": "Volkswagen Golf",
+      "cantidad": 3,
+      "precio_unitario": 15800,
+      "_id": {
+        "$oid": "698d93716b2a288e9b3a2a9d"
+      }
+    }
+  ],
+  "total": 47400,
+  "fecha": {
+    "$date": "2026-02-12T08:46:41.171Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "698d99026b2a288e9b3a2aa2"
+  },
+  "productos": [
+    {
+      "productoId": "690b1a9f7e347ebd181254a9",
+      "nombre": "Tesla Model 3",
+      "cantidad": 1,
+      "precio_unitario": 32500,
+      "_id": {
+        "$oid": "698d99026b2a288e9b3a2aa3"
+      }
+    }
+  ],
+  "total": 32500,
+  "fecha": {
+    "$date": "2026-02-12T09:10:26.053Z"
+  },
+  "__v": 0
+}]

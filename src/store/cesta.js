@@ -120,7 +120,7 @@ export const useCestaStore = defineStore("cesta", () => {
 
     if (precio < 20000) {
       isGastosEnvio.value = true;
-      precio += 2000;
+      precio += 0;
     }
 
     return precio;

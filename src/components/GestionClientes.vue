@@ -298,6 +298,24 @@
           >
             {{ editando ? "Modificar" : "Guardar" }}
           </button>
+          <button
+            v-if="nuevoCliente.tipo_cliente == 'particular'"
+            type="button"
+            @click="imprimirPDFParticular"
+            :disabled="!isAdmin"
+            class="btn btn-secondary ms-2 px-4 py-2 btn-sm rounded-0 border shadow-none"
+          >
+            <i class="bi bi-printer"></i>Imprimir Particulares
+          </button>
+          <button
+            v-else
+            type="button"
+            @click="imprimirPDFEmpresa"
+            :disabled="!isAdmin"
+            class="btn btn-secondary ms-2 px-4 py-2 btn-sm rounded-0 border shadow-none"
+          >
+            <i class="bi bi-printer"></i>Imprimir Empresa
+          </button>
         </div>
 
         <!-- Checkbox al final (alineado a la derecha) -->
@@ -402,6 +420,7 @@
 <script setup>
 import provmuniData from "../../backend/data/provmuni.json";
 import { ref, onMounted, computed } from "vue";
+import logo from "../assets/logoPng.png";
 import {
   getClientes,
   addCliente,
@@ -411,7 +430,8 @@ import {
 } from "@/api/clientes.js";
 import Swal from "sweetalert2";
 import bcrypt from "bcryptjs";
-//import jwt from "jsonwebtoken";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 
 //////////////////// SCRIPTS CRUD ///////////////////////
 
@@ -431,6 +451,55 @@ const nuevoCliente = ref({
   tipo: "user",
   password: "",
 });
+
+//IMPRIMIR
+// Imprimir PDF
+const imprimirPDFParticular = () => {
+  const doc = new jsPDF();
+
+  doc.addImage(logo, "png", 10, 10, 20, 20);
+  doc.setFontSize(18);
+  doc.text("Listado Clientes Particulares", 60, 20);
+
+  const headers = ["DNI", "NOMBRE", "TIPO", "EMAIL", "MOVIL"];
+
+  autoTable(doc, {
+    startY: 30,
+    head: [headers],
+    body: clientes.value
+      .filter((id) => id.tipo_cliente == "particular")
+      .map((id) => [id.dni, id.nombre, id.tipo_cliente, id.email, id.movil]),
+    theme: "striped",
+    styles: { fontSize: 10 },
+  });
+
+  doc.save("clientesParticulares.pdf");
+};
+
+//Imprimir empresa
+const imprimirPDFEmpresa = () => {
+  const doc = new jsPDF();
+
+  doc.addImage(logo, "png", 10, 10, 20, 20);
+  doc.setFontSize(18);
+  doc.text("Listado de Clientes Empresa", 60, 20);
+
+  const headers = ["DNI", "NOMBRE", "TIPO", "EMAIL", "MOVIL"];
+
+  autoTable(doc, {
+    startY: 30,
+    head: [headers],
+    body: clientes.value
+      .filter((id) => id.tipo_cliente == "empresa")
+      .map((id) => [id.dni, id.nombre, id.tipo_cliente, id.email, id.movil]),
+    theme: "striped",
+    styles: { fontSize: 10 },
+  });
+
+  doc.save("clientesEmpresa.pdf");
+};
+
+//import jwt from "jsonwebtoken";
 
 //////////// Declaraciones de estado o variables reactivas
 
@@ -454,6 +523,7 @@ const isLogueado = sessionStorage.getItem("isLogueado") === "true";
 
 // reactive state to track if user is admin
 const isAdmin = ref(false);
+
 /////////// zona CargarClientes
 
 // Zona Cargar clientes Al Montar el componente

@@ -54,8 +54,8 @@
               <router-link to="/ventas" class="nav-link">Ventas</router-link>
             </li>
             <li v-if="isLogueado">
-              <router-link to="/form-empleo" class="nav-link"
-                >Empleo</router-link
+              <router-link to="/facturas" class="nav-link"
+                >Facturas</router-link
               >
             </li>
             <li class="nav-item">
